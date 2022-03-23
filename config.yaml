@@ -1,0 +1,29 @@
+baseURL: "https://hgminh.dev/"
+languageCode: "en-us"
+title: "hgminh"
+
+theme: "mini"
+
+paginate: 10
+
+permalinks:
+  posts: /posts/:title/
+
+taxonomies:
+  tag: tags
+
+params:
+  author: hgminh
+  description: My Blog
+
+  enableRSS: true
+  enableComments: false
+  enableGoogleAnalytics: false
+  showToc: true
+  showPowerBy: false
+  math: true
+  copyright: ''
+
+  links:
+    - name: Github
+      path: https://github.com/hgminh95/blog

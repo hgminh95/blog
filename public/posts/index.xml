@@ -9,19 +9,19 @@
     <lastBuildDate>Wed, 23 Mar 2022 23:09:57 +0800</lastBuildDate><atom:link href="https://hgminh.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Use More Memory to Make Program Run Faster?</title>
-      <link>https://hgminh.dev/use-more-memory-to-make-program-run-faster/</link>
+      <link>https://hgminh.dev/posts/use-more-memory-to-make-program-run-faster/</link>
       <pubDate>Wed, 23 Mar 2022 23:09:57 +0800</pubDate>
       
-      <guid>https://hgminh.dev/use-more-memory-to-make-program-run-faster/</guid>
+      <guid>https://hgminh.dev/posts/use-more-memory-to-make-program-run-faster/</guid>
       <description>&lt;p&gt;Huh?&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Which Loop Is Faster</title>
-      <link>https://hgminh.dev/which-loop-is-faster/</link>
+      <link>https://hgminh.dev/posts/which-loop-is-faster/</link>
       <pubDate>Wed, 23 Mar 2022 20:54:08 +0800</pubDate>
       
-      <guid>https://hgminh.dev/which-loop-is-faster/</guid>
+      <guid>https://hgminh.dev/posts/which-loop-is-faster/</guid>
       <description>&lt;p&gt;The first loop access the memory sequentially from the beginning to the end of the array. The second one skip N steps between 2 iterations. &lt;strong&gt;Which one is faster?&lt;/strong&gt;&lt;/p&gt;</description>
     </item>
     

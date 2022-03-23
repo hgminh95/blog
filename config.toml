@@ -1,0 +1,15 @@
+baseURL = "https://hgminh.dev/"
+languageCode = "en-us"
+title = "hgminh"
+
+theme = "mini"
+
+# Generate a nice robots.txt for SEO
+enableRobotsTXT = true
+
+# Generate "Bearblog"-like URLs !only!, see https://bearblog.dev/.
+disableKinds = ["taxonomy"]
+ignoreErrors = ["error-disable-taxonomy"]
+[permalinks]
+  posts = "/:slug/"
+  tags = "/posts/:slug"

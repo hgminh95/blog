@@ -4,6 +4,9 @@ date: 2022-03-23T20:54:08+08:00
 draft: false
 ---
 
+The first loop access the memory sequentially from the beginning to the end of the array. The second one skip N steps between 2 iterations. **Which one is faster?**
+
+<!--more-->
 
 ```cpp
 int a[N * N];
@@ -18,8 +21,6 @@ for (int i = 0; i < N; ++i)
   for (int j = 0; j < N; ++j)
     sum += a[j * N + i];
 ```
-
-The first loop access the memory sequentially from the beginning to the end of the array. The second one jump N step between 2 iterations. **Which one is faster?**
 
 I have run it and here is the result (you can find the code at [Github](https://github.com/hgminh95/which_loop_is_faster) - it is not exactly the same but should be close enough for this discussion)
 

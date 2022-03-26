@@ -6,18 +6,13 @@
     <description>Recent content in os on hgminh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 23 Mar 2022 23:09:57 +0800</lastBuildDate><atom:link href="https://hgminh.dev/tags/os/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Use More Memory to Make Program Run Faster?</title>
-      <link>https://hgminh.dev/posts/use-more-memory-to-make-program-run-faster/</link>
-      <pubDate>Wed, 23 Mar 2022 23:09:57 +0800</pubDate>
-      
-      <guid>https://hgminh.dev/posts/use-more-memory-to-make-program-run-faster/</guid>
-      <description>&lt;p&gt;Huh?&lt;/p&gt;</description>
-    </item>
+    <lastBuildDate>Wed, 23 Mar 2022 20:54:08 +0800</lastBuildDate>
+    
+	<atom:link href="https://hgminh.dev/tags/os/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
-      <title>Which Loop Is Faster</title>
+      <title>Which Loop Is Faster?</title>
       <link>https://hgminh.dev/posts/which-loop-is-faster/</link>
       <pubDate>Wed, 23 Mar 2022 20:54:08 +0800</pubDate>
       

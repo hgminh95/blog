@@ -1,5 +1,5 @@
 ---
-title: "Which Loop Is Faster"
+title: "Which Loop Is Faster?"
 date: 2022-03-23T20:54:08+08:00
 tags: ["performance", "os", "memory"]
 draft: false
@@ -25,7 +25,7 @@ for (int i = 0; i < N; ++i)
 
 I have run it and here is the result (you can find the code at [Github](https://github.com/hgminh95/which_loop_is_faster) - it is not exactly the same but should be close enough for this discussion)
 
-```
+```bash
 ---------------------------------------------------------------------
 Benchmark                           Time             CPU   Iterations
 ---------------------------------------------------------------------
@@ -45,32 +45,90 @@ You can clearly see that loop #1 is faster. Now, let's find out why that is the 
 
 ## Page fault
 
-[Page fault](https://en.wikipedia.org/wiki/Page_fault) happens when we try to access memory that is not in the main memory. The kernel need to delay the program and load the memory from storage like hard drive, which is very expensive. Since loop #2 jumps back and forth between different pages, it could trigger more [page fault](https://en.wikipedia.org/wiki/Page_fault) than #1 if N is big enough.
+[Page fault](https://en.wikipedia.org/wiki/Page_fault) happens when we try to access memory that is not in the main memory. The kernel need to delay the program and load the memory from storage like hard drive, which is very expensive. Since loop #2 jumps back and forth between different pages, it could trigger more page fault than #1 if N is big enough.
+
+To check on the number of page faults, you can use below command
+
+```bash
+$ perf stat -e page-faults,minor-faults,major-faults <program>
+```
+
+Where `minor-faults` is when the page is in memory but is not registed to the memory management unit, `major-faults` is when the page is not in main memory, and `page-faults` is sum of them. Below is one possible result,
+
+```bash
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1WithPageFault':
+
+           785,074      page-faults
+            33,743      major-faults
+           751,331      minor-faults
+
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2WithPageFault':
+
+           579,736      page-faults
+           157,724      major-faults
+           422,012      minor-faults
+```
 
 ## TLB misses
 
-The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the [page table](https://en.wikipedia.org/wiki/Page_tabl) (depsite the name, it is actually like a tree, hence "walking"). Since page table can be very large (say we have 16GB of RAM, which each page is 4KB, you do the math), we have something called [TLB](https://en.wikipedia.org/wiki/Translation_lookaside_buffer) to cache the page table. TLB miss happen when we try to access a page which is not in TLB.
+The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the [page table](https://en.wikipedia.org/wiki/Page_tabl) (depsite the name, it is actually like a tree, hence "walking"). Since page table can be very large (say we have 16GB of RAM, which each page is 4KB, you do the math), we have something called [Translation Lookaside Buffer or TLB](https://en.wikipedia.org/wiki/Translation_lookaside_buffer) to cache the page table. TLB miss happen when we try to access a page which is not in TLB.
 
 Again, going back and forth between different pages won't help in this case either.
 
 To see number of TLB misses, you can run below commands:
 
 ```bash
-$ perf stats -e <tlb something something> ./bazel-bin/bm_loop --benchmark_filter BM_LoopNo1
+$ perf stat -e dTLB-loads,dTLB-load-misses <program>
+```
 
-....
+where `dTLB` is data TLB (there is `iTLB` for instruction), and `load-misses` means number of lookup that miss TLB.
 
-$ perf stats -e <tlb something something> ./bazel-bin/bm_loop --benchmark_filter BM_LoopNo2
+```bash
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192':
+
+         2,494,435      dTLB-load-misses          #    0.06% of all dTLB cache hits 
+     4,338,977,389      dTLB-loads
+
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192':
+
+        49,024,649      dTLB-load-misses          #   25.15% of all dTLB cache hits 
+       194,919,514      dTLB-loads
 ```
 
 ## CPU Cache
 
-Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That's why we have L1, L2, L3 cache, which will save the memory near the CPU, so in case if we need to access them again, it would be fast (a few cycles if in L1 cache). But we only access each element once, how can cache help? Turn out we don't load 1 element to the cache at one time, we load a cache line, which is 64 bytes at a time. So everytime we access an element, it will load 15 other elements (assuming int is 32-bit) to the cache, speeding up the next 15 memory access if we iterate them in sequential order.
+Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That's why we have [CPU cache](https://en.wikipedia.org/wiki/CPU_cache), which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.
+
+But since we only access each element once in this example, how can cache help? Turn out we don't load 1 element to the cache at one time, we load a cache line, which usually are 64 bytes. So everytime we access an element, it will load 15 other elements (assuming int is 32-bit) to the cache, speeding up the next 15 memory access if we iterate them in sequential order.
 
 You can check the cache miss number with below commands:
 
 ```bash
-$ perf stat -e .... ./bazel-bin/bm_loop --benchmark_filter BM_LoopNo1
+$ perf stat -e LLC-load-misses,LLC-loads,cache-misses,cache-references,L1-dcache-load-misses,L1-dcache-loads <program>
+```
+
+where `LLC` is last level cache, `L1-dcache` is L1 data cache. `cache-misses` and `cache-references` are a bit complicated, which will be explained in the next section.
+
+
+```bash
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192':
+
+         2,352,992      LLC-load-misses           #   77.87% of all LL-cache hits
+         3,021,610      LLC-loads
+       202,095,479      cache-misses              #   68.146 % of all cache refs  
+       296,563,720      cache-references
+       146,312,615      L1-dcache-load-misses     #    3.36% of all L1-dcache hits
+     4,360,007,818      L1-dcache-loads
+
+
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192':
+
+        64,697,884      LLC-load-misses           #   63.72% of all LL-cache hits
+       101,542,342      LLC-loads
+        92,728,013      cache-misses              #   29.577 % of all cache refs  
+       313,512,368      cache-references
+       195,821,883      L1-dcache-load-misses     #   98.11% of all L1-dcache hits
+       199,602,098      L1-dcache-loads
 ```
 
 ## Cache Prefetching
@@ -79,6 +137,12 @@ You might realize something is off by looking at above number. How can number of
 
 ## Compiler Optimization
 
-Magic magic
+Processing the data sequentially also makes the compiler's job easier.
+
+- GCC: https://godbolt.org/z/GWq55rsTr
+- Clang: https://godbolt.org/z/4Tcsodf8s
 
 ## References
+
+- [Linux Virtual Memory](https://docs.kernel.org/vm/index.html)
+- [Intel Software Developer's Manual Volume 3](https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-system-programming-manual-325384.pdf)

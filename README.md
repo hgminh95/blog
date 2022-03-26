@@ -1,6 +1,6 @@
 # blog
 
-Simple blog written in hugo. Check out http://hgminh.dev
+Simple blog written in hugo. Check out https://hgminh.dev
 
 ## Usage
 

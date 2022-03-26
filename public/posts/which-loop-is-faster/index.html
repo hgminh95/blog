@@ -70,7 +70,7 @@
           ·
         </span>
         <span>
-          4 minute read
+          5 minute read
         </span>
     </div>
 
@@ -161,12 +161,13 @@ BM_LoopNo2/8192             <span style="color:#ae81ff">794375658</span> ns    <
 
         49,024,649      dTLB-load-misses          <span style="color:#75715e">#   25.15% of all dTLB cache hits</span> 
        194,919,514      dTLB-loads
-</code></pre></div><h2 id="cpu-cache">CPU Cache</h2>
+</code></pre></div><p>I wrote a <a href="https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp" target="_blank" rel="noopener">small utility</a> to lock abitrary amount of memory in RAM, to simulate the low memory scenario.</p>
+<h2 id="cpu-cache">CPU Cache</h2>
 <p>Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That&rsquo;s why we have <a href="https://en.wikipedia.org/wiki/CPU_cache" target="_blank" rel="noopener">CPU cache</a>, which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.</p>
 <p>But since we only access each element once in this example, how can cache help? Turn out we don&rsquo;t load 1 element to the cache at one time, we load a cache line, which usually are 64 bytes. So everytime we access an element, it will load 15 other elements (assuming int is 32-bit) to the cache, speeding up the next 15 memory access if we iterate them in sequential order.</p>
 <p>You can check the cache miss number with below commands:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ perf stat -e LLC-load-misses,LLC-loads,cache-misses,cache-references,L1-dcache-load-misses,L1-dcache-loads &lt;program&gt;
-</code></pre></div><p>where <code>LLC</code> is last level cache, <code>L1-dcache</code> is L1 data cache. <code>cache-misses</code> and <code>cache-references</code> are a bit complicated, which will be explained in the next section.</p>
+</code></pre></div><p>where <code>LLC</code> is last level cache, <code>L1-dcache</code> is L1 data cache.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192&#39;</span>:
 
          2,352,992      LLC-load-misses           <span style="color:#75715e">#   77.87% of all LL-cache hits</span>
@@ -185,18 +186,24 @@ BM_LoopNo2/8192             <span style="color:#ae81ff">794375658</span> ns    <
        313,512,368      cache-references
        195,821,883      L1-dcache-load-misses     <span style="color:#75715e">#   98.11% of all L1-dcache hits</span>
        199,602,098      L1-dcache-loads
-</code></pre></div><h2 id="cache-prefetching">Cache Prefetching</h2>
-<p>You might realize something is off by looking at above number. How can number of cache misses are so small compared to 1:15 ratio? Again, CPU is one step ahead of us. It has something called prefetcher which will try to find out the memory access pattern to predict the next memory access, fetching them into the cache before we even access them.</p>
+</code></pre></div><p><strong>NOTE</strong>: since google benchmark run the code multiple times, we cannot compare the absolute value here, only the percentage of cache misses matter.</p>
+<p>You can see that <code>L1-dcache-load-misses</code> in loop#1 is much smaller compared to loop#2 (3% vs 98% miss rate). There are some weird stuff going on with <code>cache-misses</code> and <code>cache-references</code> though. Despite the name, it is actually LLC Reference (r4f2e) and LLC Misses (r412e). But I am not sure what is the differences between that and LLC-load and LLC-loads-misses (<strong>TODO</strong>).</p>
+<h2 id="cache-prefetching">Cache Prefetching</h2>
+<p>You might realize something is off by looking at above number. How can number of cache misses are so small compared to 1:15 ratio? Again, CPU is one step ahead of us. It has something called <a href="https://en.wikipedia.org/wiki/Cache_prefetching" target="_blank" rel="noopener">prefetcher</a> which will try to find out the memory access pattern to predict the next memory access, fetching them into the cache before we even access them.</p>
+<p>To test this, you can make each array element 64 bytes, which is equal to the cache line, to see if the miss rate is the same between loop#1 and loop#2. <code>perf</code> also has some performance counter related to that; e.g. LLC-prefetches, L1-dcache-prefetches, etc; but I haven&rsquo;t been able to test on a CPU that support those counters yet (<strong>TODO</strong>)</p>
 <h2 id="compiler-optimization">Compiler Optimization</h2>
-<p>Processing the data sequentially also makes the compiler&rsquo;s job easier.</p>
+<p>Iterating through the data sequentially also makes the compiler&rsquo;s job easier. One important optimization is auto vectorization, which will enable instruction level parallelism. You can see it in action in the below examples:</p>
 <ul>
 <li>GCC: <a href="https://godbolt.org/z/GWq55rsTr">https://godbolt.org/z/GWq55rsTr</a></li>
 <li>Clang: <a href="https://godbolt.org/z/4Tcsodf8s">https://godbolt.org/z/4Tcsodf8s</a></li>
 </ul>
+<p>In GCC, loop #1 sum 4 elements at once, while loop#2 add to the sum one by one.</p>
 <h2 id="references">References</h2>
 <ul>
 <li><a href="https://docs.kernel.org/vm/index.html" target="_blank" rel="noopener">Linux Virtual Memory</a></li>
 <li><a href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-system-programming-manual-325384.pdf" target="_blank" rel="noopener">Intel Software Developer&rsquo;s Manual Volume 3</a></li>
+<li><a href="https://llvm.org/docs/Vectorizers.html" target="_blank" rel="noopener">Clang Vectorization</a></li>
+<li><a href="http://gcc.gnu.org/projects/tree-ssa/vectorization.html" target="_blank" rel="noopener">GCC Vectorization</a></li>
 </ul>
     </div>
 
@@ -221,19 +228,6 @@ BM_LoopNo2/8192             <span style="color:#ae81ff">794375658</span> ns    <
     
     <footer id="footer">
     
-
-    <div class="copyright">
-    
-       © Copyright 
-       2022 
-       <span class="split">
-        <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
-  <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
-</svg>
-       </span>
-       hgminh
-    
-    </div>
 
     
 </footer>

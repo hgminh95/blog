@@ -95,6 +95,8 @@ where `dTLB` is data TLB (there is `iTLB` for instruction), and `load-misses` me
        194,919,514      dTLB-loads
 ```
 
+I wrote a [small utility](https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp) to lock abitrary amount of memory in RAM, to simulate the low memory scenario.
+
 ## CPU Cache
 
 Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That's why we have [CPU cache](https://en.wikipedia.org/wiki/CPU_cache), which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.
@@ -107,7 +109,7 @@ You can check the cache miss number with below commands:
 $ perf stat -e LLC-load-misses,LLC-loads,cache-misses,cache-references,L1-dcache-load-misses,L1-dcache-loads <program>
 ```
 
-where `LLC` is last level cache, `L1-dcache` is L1 data cache. `cache-misses` and `cache-references` are a bit complicated, which will be explained in the next section.
+where `LLC` is last level cache, `L1-dcache` is L1 data cache.
 
 
 ```bash
@@ -131,18 +133,29 @@ where `LLC` is last level cache, `L1-dcache` is L1 data cache. `cache-misses` an
        199,602,098      L1-dcache-loads
 ```
 
+**NOTE**: since google benchmark run the code multiple times, we cannot compare the absolute value here, only the percentage of cache misses matter.
+
+You can see that `L1-dcache-load-misses` in loop#1 is much smaller compared to loop#2 (3% vs 98% miss rate). There are some weird stuff going on with `cache-misses` and `cache-references` though. Despite the name, it is actually LLC Reference (r4f2e) and LLC Misses (r412e). But I am not sure what is the differences between that and LLC-load and LLC-loads-misses (**TODO**).
+
+
 ## Cache Prefetching
 
-You might realize something is off by looking at above number. How can number of cache misses are so small compared to 1:15 ratio? Again, CPU is one step ahead of us. It has something called prefetcher which will try to find out the memory access pattern to predict the next memory access, fetching them into the cache before we even access them.
+You might realize something is off by looking at above number. How can number of cache misses are so small compared to 1:15 ratio? Again, CPU is one step ahead of us. It has something called [prefetcher](https://en.wikipedia.org/wiki/Cache_prefetching) which will try to find out the memory access pattern to predict the next memory access, fetching them into the cache before we even access them.
+
+To test this, you can make each array element 64 bytes, which is equal to the cache line, to see if the miss rate is the same between loop#1 and loop#2. `perf` also has some performance counter related to that; e.g. LLC-prefetches, L1-dcache-prefetches, etc; but I haven't been able to test on a CPU that support those counters yet (**TODO**)
 
 ## Compiler Optimization
 
-Processing the data sequentially also makes the compiler's job easier.
+Iterating through the data sequentially also makes the compiler's job easier. One important optimization is auto vectorization, which will enable instruction level parallelism. You can see it in action in the below examples:
 
 - GCC: https://godbolt.org/z/GWq55rsTr
 - Clang: https://godbolt.org/z/4Tcsodf8s
+
+In GCC, loop #1 sum 4 elements at once, while loop#2 add to the sum one by one.
 
 ## References
 
 - [Linux Virtual Memory](https://docs.kernel.org/vm/index.html)
 - [Intel Software Developer's Manual Volume 3](https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-system-programming-manual-325384.pdf)
+- [Clang Vectorization](https://llvm.org/docs/Vectorizers.html)
+- [GCC Vectorization](http://gcc.gnu.org/projects/tree-ssa/vectorization.html)

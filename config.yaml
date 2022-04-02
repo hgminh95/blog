@@ -17,7 +17,7 @@ params:
   description: My Blog
 
   enableRSS: true
-  enableComments: false
+  enableComments: true
   enableGoogleAnalytics: false
   showToc: true
   showPowerBy: false

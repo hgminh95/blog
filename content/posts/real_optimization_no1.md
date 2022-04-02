@@ -10,4 +10,4 @@ Just a note on some optimization found in the wild.
 
 ## $2^n-1$
 
-The idea is that if $k = 2^n - 1$ then $x = x & k (mod k)$
+The idea is that if $k = 2^n - 1$ then $$x = x & k (mod k)$$

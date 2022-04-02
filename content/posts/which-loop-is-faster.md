@@ -2,10 +2,11 @@
 title: "Which Loop Is Faster?"
 date: 2022-03-23T20:54:08+08:00
 tags: ["performance", "os", "memory"]
+thumbnail: which-loop-is-faster.png
 draft: false
 ---
 
-The first loop access the memory sequentially from the beginning to the end of the array. The second one skip N steps between 2 iterations. **Which one is faster?**
+The first loop accesses the memory sequentially from the beginning to the end of the array. The second one skips N steps between 2 iterations. **Which one is faster?**
 
 <!--more-->
 
@@ -43,6 +44,11 @@ BM_LoopNo2/8192             794375658 ns    656250000 ns            1
 
 You can clearly see that loop #1 is faster. Now, let's find out why that is the case.
 
+**NOTE**:
+
+- In this blog we use [Google Benchmark Library](https://github.com/google/benchmark) to run benchmark code and [perf](https://perf.wiki.kernel.org/index.php/Main_Page) to collect performance counters from kernel and CPU. You can check them out if you are not familiar.
+- I uses Linux and Intel CPU for this. Other platforms might be different.
+
 ## Page fault
 
 [Page fault](https://en.wikipedia.org/wiki/Page_fault) happens when we try to access memory that is not in the main memory. The kernel need to delay the program and load the memory from storage like hard drive, which is very expensive. Since loop #2 jumps back and forth between different pages, it could trigger more page fault than #1 if N is big enough.
@@ -53,7 +59,7 @@ To check on the number of page faults, you can use below command
 $ perf stat -e page-faults,minor-faults,major-faults <program>
 ```
 
-Where `minor-faults` is when the page is in memory but is not registed to the memory management unit, `major-faults` is when the page is not in main memory, and `page-faults` is sum of them. Below is one possible result,
+Where `minor-faults` is when the page is in memory but is not allocated to the process or not registed to the memory management unit (e.g. when you first access the memory), `major-faults` is when the page is not in main memory (that is very costly operation since we might need to read the memory from disk), and `page-faults` is sum of them. Below is one possible result,
 
 ```bash
 './bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1WithPageFault':
@@ -68,6 +74,9 @@ Where `minor-faults` is when the page is in memory but is not registed to the me
            157,724      major-faults
            422,012      minor-faults
 ```
+
+**NOTE**:
+- I wrote a [small utility](https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp) to lock abitrary amount of memory in RAM, to simulate the low memory scenario.
 
 ## TLB misses
 
@@ -95,8 +104,6 @@ where `dTLB` is data TLB (there is `iTLB` for instruction), and `load-misses` me
        194,919,514      dTLB-loads
 ```
 
-I wrote a [small utility](https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp) to lock abitrary amount of memory in RAM, to simulate the low memory scenario.
-
 ## CPU Cache
 
 Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That's why we have [CPU cache](https://en.wikipedia.org/wiki/CPU_cache), which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.
@@ -106,7 +113,7 @@ But since we only access each element once in this example, how can cache help? 
 You can check the cache miss number with below commands:
 
 ```bash
-$ perf stat -e LLC-load-misses,LLC-loads,cache-misses,cache-references,L1-dcache-load-misses,L1-dcache-loads <program>
+$ perf stat -e L1-dcache-load-misses,L1-dcache-loads <program>
 ```
 
 where `LLC` is last level cache, `L1-dcache` is L1 data cache.
@@ -115,25 +122,15 @@ where `LLC` is last level cache, `L1-dcache` is L1 data cache.
 ```bash
 './bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192':
 
-         2,352,992      LLC-load-misses           #   77.87% of all LL-cache hits
-         3,021,610      LLC-loads
-       202,095,479      cache-misses              #   68.146 % of all cache refs  
-       296,563,720      cache-references
        146,312,615      L1-dcache-load-misses     #    3.36% of all L1-dcache hits
      4,360,007,818      L1-dcache-loads
 
 
 './bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192':
 
-        64,697,884      LLC-load-misses           #   63.72% of all LL-cache hits
-       101,542,342      LLC-loads
-        92,728,013      cache-misses              #   29.577 % of all cache refs  
-       313,512,368      cache-references
        195,821,883      L1-dcache-load-misses     #   98.11% of all L1-dcache hits
        199,602,098      L1-dcache-loads
 ```
-
-**NOTE**: since google benchmark run the code multiple times, we cannot compare the absolute value here, only the percentage of cache misses matter.
 
 You can see that `L1-dcache-load-misses` in loop#1 is much smaller compared to loop#2 (3% vs 98% miss rate). There are some weird stuff going on with `cache-misses` and `cache-references` though. Despite the name, it is actually LLC Reference (r4f2e) and LLC Misses (r412e). But I am not sure what is the differences between that and LLC-load and LLC-loads-misses (**TODO**).
 
@@ -146,12 +143,48 @@ To test this, you can make each array element 64 bytes, which is equal to the ca
 
 ## Compiler Optimization
 
-Iterating through the data sequentially also makes the compiler's job easier. One important optimization is auto vectorization, which will enable instruction level parallelism. You can see it in action in the below examples:
+Iterating through the data sequentially also makes the compiler's job easier. One important optimization is [auto vectorization](https://en.wikipedia.org/wiki/Automatic_vectorization), which will use vector instructions, which operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:
 
 - GCC: https://godbolt.org/z/GWq55rsTr
 - Clang: https://godbolt.org/z/4Tcsodf8s
 
-In GCC, loop #1 sum 4 elements at once, while loop#2 add to the sum one by one.
+In GCC, loop #1 sum multiple elements at once (see the instructions with `xmm` registers), while loop#2 add to the sum one by one.
+
+## What else?
+
+Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don't know for if there is an easy way to determine that. One thing we can do is to eliminiate all the above problems and then see if the speed is the same.
+
+Here are what we can do:
+
+- [Donwload more RAM](https://downloadmoreram.com/) to prevent major page fault.
+- Prefault the page with [`explicit_bzero`](https://man7.org/linux/man-pages/man3/bzero.3.html) to prevent minor page fault.
+- Use [huge page](https://www.kernel.org/doc/html/latest/admin-guide/mm/hugetlbpage.html) to reduce TLB misses.
+- Add padding bytes to make sure each element is in 1 cache line.
+- Flush all caches between runs
+- Disable all CPU prefetch. You can do that via BIOS (in my machine, I disabled Adjacent Cache Line Prefetch, and Hardware Prefetch) or [MSR](https://en.wikipedia.org/wiki/Model-specific_register) if supported.
+- Disable vectorization optimization. In GCC, you can use `__attribute__((optimize("no-tree-vectorize")))`.
+
+After all of that, you can have something like [this](https://github.com/hgminh95/which_loop_is_faster/blob/master/loop_what_else.cpp). Let's see the result
+
+```bash
+$ ./bazel-bin/bm_loop_what_else --benchmark_filter=BM_Loop.*/64
+2022-04-02T20:11:07+08:00
+Running ./bazel-bin/bm_loop_what_else
+Run on (6 X 4359.9 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x6)
+  L1 Instruction 32 KiB (x6)
+  L2 Unified 256 KiB (x6)
+  L3 Unified 12288 KiB (x1)
+Load Average: 0.78, 0.63, 0.47
+--------------------------------------------------------------------
+Benchmark                          Time             CPU   Iterations
+--------------------------------------------------------------------
+BM_LoopNo1/64/manual_time       6894 ns        47600 ns       101546
+BM_LoopNo2/64/manual_time       8360 ns        49097 ns        84305
+```
+
+Loop #2 is still slower and I have no idea why 😢. If you have any idea on why that is the case, let me know in the comment below.
 
 ## References
 

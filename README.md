@@ -13,7 +13,7 @@ $ hugo server -D
 To build it, run
 
 ```bash
-$ hugo
+$ HUGO_ENV=production hugo
 ```
 
 Note that we add the build artifact to git since Cloudflare Pages does not support newer version of hugo.

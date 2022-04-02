@@ -1,51 +1,27 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
     <loc>https://hgminh.dev/</loc>
-    <lastmod>2022-03-24T00:38:02+08:00</lastmod>
+    <lastmod>2022-03-23T20:54:08+08:00</lastmod>
     <priority>0</priority>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://hgminh.dev/posts/</loc>
-    <lastmod>2022-03-24T00:38:02+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://hgminh.dev/posts/optimization-in-real-code-no.-1/</loc>
-    <lastmod>2022-03-24T00:38:02+08:00</lastmod>
-  </url>
-  
-  <url>
+    <lastmod>2022-03-23T20:54:08+08:00</lastmod>
+  </url><url>
     <loc>https://hgminh.dev/tags/memory/</loc>
-    <lastmod>2022-03-23T23:09:57+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://hgminh.dev/tags/</loc>
-    <lastmod>2022-03-23T23:09:57+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://hgminh.dev/posts/unused-memory-that-make-program-run-faster/</loc>
-    <lastmod>2022-03-23T23:09:57+08:00</lastmod>
-  </url>
-  
-  <url>
+    <lastmod>2022-03-23T20:54:08+08:00</lastmod>
+  </url><url>
     <loc>https://hgminh.dev/tags/os/</loc>
     <lastmod>2022-03-23T20:54:08+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://hgminh.dev/tags/performance/</loc>
     <lastmod>2022-03-23T20:54:08+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
+    <loc>https://hgminh.dev/tags/</loc>
+    <lastmod>2022-03-23T20:54:08+08:00</lastmod>
+  </url><url>
     <loc>https://hgminh.dev/posts/which-loop-is-faster/</loc>
     <lastmod>2022-03-23T20:54:08+08:00</lastmod>
   </url>
-  
 </urlset>

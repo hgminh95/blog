@@ -6,11 +6,15 @@
     <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
 <meta name="viewport" content="width=device-width,minimum-scale=1">
-<meta name="description" content="The first loop access the memory sequentially from the beginning to the end of the array. The second one skip N steps between 2 iterations. Which one is faster?">
-<meta name="generator" content="Hugo 0.68.3" />
+<meta name="description" content="The first loop accesses the memory sequentially from the beginning to the end of the array. The second one skips N steps between 2 iterations. Which one is faster?">
+<meta name="og:description" content="The first loop accesses the memory sequentially from the beginning to the end of the array. The second one skips N steps between 2 iterations. Which one is faster?">
+
+<meta name="og:image" content="/images/which-loop-is-faster.png">
+
+<meta name="generator" content="Hugo 0.96.0" />
 
 
-  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+  <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
 
 
 <link rel="stylesheet" href="/css/style.css">
@@ -20,13 +24,12 @@
 <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
 
 
-
-
   
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css" integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js" integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous"
     onload="renderMathInElement(document.body);"></script>
+
 
 
 
@@ -64,13 +67,13 @@
           ·
         </span>
         <span>
-          wordCount
+          1293 words
         </span>
         <span class="split">
           ·
         </span>
         <span>
-          5 minute read
+          7 minute read
         </span>
     </div>
 
@@ -79,7 +82,7 @@
         
   
     <aside class="toc">
-      <details>
+      <details open>
           <summary>Table of Contents
           </summary>
           <div>
@@ -90,6 +93,7 @@
     <li><a href="#cpu-cache">CPU Cache</a></li>
     <li><a href="#cache-prefetching">Cache Prefetching</a></li>
     <li><a href="#compiler-optimization">Compiler Optimization</a></li>
+    <li><a href="#what-else">What else?</a></li>
     <li><a href="#references">References</a></li>
   </ul>
 </nav>
@@ -103,103 +107,124 @@
 
 
     <div class="content">
-      <p>The first loop access the memory sequentially from the beginning to the end of the array. The second one skip N steps between 2 iterations. <strong>Which one is faster?</strong></p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#66d9ef">int</span> a[N <span style="color:#f92672">*</span> N];
-
-<span style="color:#75715e">// Loop #1
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>i)
-  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>j)
-    sum <span style="color:#f92672">+=</span> a[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
-
-<span style="color:#75715e">// Loop #2
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>i)
-  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>j)
-    sum <span style="color:#f92672">+=</span> a[j <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> i];
-</code></pre></div><p>I have run it and here is the result (you can find the code at <a href="https://github.com/hgminh95/which_loop_is_faster" target="_blank" rel="noopener">Github</a> - it is not exactly the same but should be close enough for this discussion)</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">---------------------------------------------------------------------
-Benchmark                           Time             CPU   Iterations
----------------------------------------------------------------------
-BM_LoopNo1/16                     <span style="color:#ae81ff">131</span> ns          <span style="color:#ae81ff">108</span> ns      <span style="color:#ae81ff">8960000</span>
-BM_LoopNo1/64                    <span style="color:#ae81ff">1965</span> ns         <span style="color:#ae81ff">1726</span> ns       <span style="color:#ae81ff">407273</span>
-BM_LoopNo1/512                 <span style="color:#ae81ff">129987</span> ns        <span style="color:#ae81ff">97656</span> ns         <span style="color:#ae81ff">5600</span>
-BM_LoopNo1/4096               <span style="color:#ae81ff">9786057</span> ns      <span style="color:#ae81ff">8789062</span> ns          <span style="color:#ae81ff">112</span>
-BM_LoopNo1/8192              <span style="color:#ae81ff">39223035</span> ns     <span style="color:#ae81ff">21354167</span> ns           <span style="color:#ae81ff">30</span>
-BM_LoopNo2/16                     <span style="color:#ae81ff">128</span> ns         73.4 ns     <span style="color:#ae81ff">10000000</span>
-BM_LoopNo2/64                    <span style="color:#ae81ff">1975</span> ns         <span style="color:#ae81ff">1420</span> ns       <span style="color:#ae81ff">407273</span>
-BM_LoopNo2/512                 <span style="color:#ae81ff">784854</span> ns       <span style="color:#ae81ff">619071</span> ns         <span style="color:#ae81ff">1792</span>
-BM_LoopNo2/4096             <span style="color:#ae81ff">139502128</span> ns    <span style="color:#ae81ff">111111111</span> ns            <span style="color:#ae81ff">9</span>
-BM_LoopNo2/8192             <span style="color:#ae81ff">794375658</span> ns    <span style="color:#ae81ff">656250000</span> ns            <span style="color:#ae81ff">1</span>
-</code></pre></div><p>You can clearly see that loop #1 is faster. Now, let&rsquo;s find out why that is the case.</p>
-<h2 id="page-fault">Page fault</h2>
-<p><a href="https://en.wikipedia.org/wiki/Page_fault" target="_blank" rel="noopener">Page fault</a> happens when we try to access memory that is not in the main memory. The kernel need to delay the program and load the memory from storage like hard drive, which is very expensive. Since loop #2 jumps back and forth between different pages, it could trigger more page fault than #1 if N is big enough.</p>
+      <p>The first loop accesses the memory sequentially from the beginning to the end of the array. The second one skips N steps between 2 iterations. <strong>Which one is faster?</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> a[N <span style="color:#f92672">*</span> N];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Loop #1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>j)
+</span></span><span style="display:flex;"><span>    sum <span style="color:#f92672">+=</span> a[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Loop #2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; <span style="color:#f92672">++</span>j)
+</span></span><span style="display:flex;"><span>    sum <span style="color:#f92672">+=</span> a[j <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> i];
+</span></span></code></pre></div><p>I have run it and here is the result (you can find the code at <a href="https://github.com/hgminh95/which_loop_is_faster" target="_blank" rel="noopener">Github</a> - it is not exactly the same but should be close enough for this discussion)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>---------------------------------------------------------------------
+</span></span><span style="display:flex;"><span>Benchmark                           Time             CPU   Iterations
+</span></span><span style="display:flex;"><span>---------------------------------------------------------------------
+</span></span><span style="display:flex;"><span>BM_LoopNo1/16                     <span style="color:#ae81ff">131</span> ns          <span style="color:#ae81ff">108</span> ns      <span style="color:#ae81ff">8960000</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo1/64                    <span style="color:#ae81ff">1965</span> ns         <span style="color:#ae81ff">1726</span> ns       <span style="color:#ae81ff">407273</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo1/512                 <span style="color:#ae81ff">129987</span> ns        <span style="color:#ae81ff">97656</span> ns         <span style="color:#ae81ff">5600</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo1/4096               <span style="color:#ae81ff">9786057</span> ns      <span style="color:#ae81ff">8789062</span> ns          <span style="color:#ae81ff">112</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo1/8192              <span style="color:#ae81ff">39223035</span> ns     <span style="color:#ae81ff">21354167</span> ns           <span style="color:#ae81ff">30</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo2/16                     <span style="color:#ae81ff">128</span> ns         73.4 ns     <span style="color:#ae81ff">10000000</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo2/64                    <span style="color:#ae81ff">1975</span> ns         <span style="color:#ae81ff">1420</span> ns       <span style="color:#ae81ff">407273</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo2/512                 <span style="color:#ae81ff">784854</span> ns       <span style="color:#ae81ff">619071</span> ns         <span style="color:#ae81ff">1792</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo2/4096             <span style="color:#ae81ff">139502128</span> ns    <span style="color:#ae81ff">111111111</span> ns            <span style="color:#ae81ff">9</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo2/8192             <span style="color:#ae81ff">794375658</span> ns    <span style="color:#ae81ff">656250000</span> ns            <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>You can clearly see that loop #1 is faster. Now, let&rsquo;s find out why that is the case.</p>
+<p><strong>NOTE</strong>:</p>
+<ul>
+<li>In this blog we use <a href="https://github.com/google/benchmark" target="_blank" rel="noopener">Google Benchmark Library</a> to run benchmark code and <a href="https://perf.wiki.kernel.org/index.php/Main_Page" target="_blank" rel="noopener">perf</a> to collect performance counters from kernel and CPU. You can check them out if you are not familiar.</li>
+<li>I uses Linux and Intel CPU for this. Other platforms might be different.</li>
+</ul>
+<h2 id="page-fault">Page fault <a href="#page-fault" class="anchor">🔗</a></h2><p><a href="https://en.wikipedia.org/wiki/Page_fault" target="_blank" rel="noopener">Page fault</a> happens when we try to access memory that is not in the main memory. The kernel need to delay the program and load the memory from storage like hard drive, which is very expensive. Since loop #2 jumps back and forth between different pages, it could trigger more page fault than #1 if N is big enough.</p>
 <p>To check on the number of page faults, you can use below command</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ perf stat -e page-faults,minor-faults,major-faults &lt;program&gt;
-</code></pre></div><p>Where <code>minor-faults</code> is when the page is in memory but is not registed to the memory management unit, <code>major-faults</code> is when the page is not in main memory, and <code>page-faults</code> is sum of them. Below is one possible result,</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1WithPageFault&#39;</span>:
-
-           785,074      page-faults
-            33,743      major-faults
-           751,331      minor-faults
-
-<span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2WithPageFault&#39;</span>:
-
-           579,736      page-faults
-           157,724      major-faults
-           422,012      minor-faults
-</code></pre></div><h2 id="tlb-misses">TLB misses</h2>
-<p>The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the <a href="https://en.wikipedia.org/wiki/Page_tabl" target="_blank" rel="noopener">page table</a> (depsite the name, it is actually like a tree, hence &ldquo;walking&rdquo;). Since page table can be very large (say we have 16GB of RAM, which each page is 4KB, you do the math), we have something called <a href="https://en.wikipedia.org/wiki/Translation_lookaside_buffer" target="_blank" rel="noopener">Translation Lookaside Buffer or TLB</a> to cache the page table. TLB miss happen when we try to access a page which is not in TLB.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ perf stat -e page-faults,minor-faults,major-faults &lt;program&gt;
+</span></span></code></pre></div><p>Where <code>minor-faults</code> is when the page is in memory but is not allocated to the process or not registed to the memory management unit (e.g. when you first access the memory), <code>major-faults</code> is when the page is not in main memory (that is very costly operation since we might need to read the memory from disk), and <code>page-faults</code> is sum of them. Below is one possible result,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1WithPageFault&#39;</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>           785,074      page-faults
+</span></span><span style="display:flex;"><span>            33,743      major-faults
+</span></span><span style="display:flex;"><span>           751,331      minor-faults
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2WithPageFault&#39;</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>           579,736      page-faults
+</span></span><span style="display:flex;"><span>           157,724      major-faults
+</span></span><span style="display:flex;"><span>           422,012      minor-faults
+</span></span></code></pre></div><p><strong>NOTE</strong>:</p>
+<ul>
+<li>I wrote a <a href="https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp" target="_blank" rel="noopener">small utility</a> to lock abitrary amount of memory in RAM, to simulate the low memory scenario.</li>
+</ul>
+<h2 id="tlb-misses">TLB misses <a href="#tlb-misses" class="anchor">🔗</a></h2><p>The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the <a href="https://en.wikipedia.org/wiki/Page_tabl" target="_blank" rel="noopener">page table</a> (depsite the name, it is actually like a tree, hence &ldquo;walking&rdquo;). Since page table can be very large (say we have 16GB of RAM, which each page is 4KB, you do the math), we have something called <a href="https://en.wikipedia.org/wiki/Translation_lookaside_buffer" target="_blank" rel="noopener">Translation Lookaside Buffer or TLB</a> to cache the page table. TLB miss happen when we try to access a page which is not in TLB.</p>
 <p>Again, going back and forth between different pages won&rsquo;t help in this case either.</p>
 <p>To see number of TLB misses, you can run below commands:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ perf stat -e dTLB-loads,dTLB-load-misses &lt;program&gt;
-</code></pre></div><p>where <code>dTLB</code> is data TLB (there is <code>iTLB</code> for instruction), and <code>load-misses</code> means number of lookup that miss TLB.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192&#39;</span>:
-
-         2,494,435      dTLB-load-misses          <span style="color:#75715e">#    0.06% of all dTLB cache hits</span> 
-     4,338,977,389      dTLB-loads
-
-<span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192&#39;</span>:
-
-        49,024,649      dTLB-load-misses          <span style="color:#75715e">#   25.15% of all dTLB cache hits</span> 
-       194,919,514      dTLB-loads
-</code></pre></div><p>I wrote a <a href="https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp" target="_blank" rel="noopener">small utility</a> to lock abitrary amount of memory in RAM, to simulate the low memory scenario.</p>
-<h2 id="cpu-cache">CPU Cache</h2>
-<p>Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That&rsquo;s why we have <a href="https://en.wikipedia.org/wiki/CPU_cache" target="_blank" rel="noopener">CPU cache</a>, which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ perf stat -e dTLB-loads,dTLB-load-misses &lt;program&gt;
+</span></span></code></pre></div><p>where <code>dTLB</code> is data TLB (there is <code>iTLB</code> for instruction), and <code>load-misses</code> means number of lookup that miss TLB.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192&#39;</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>         2,494,435      dTLB-load-misses          <span style="color:#75715e">#    0.06% of all dTLB cache hits </span>
+</span></span><span style="display:flex;"><span>     4,338,977,389      dTLB-loads
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192&#39;</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        49,024,649      dTLB-load-misses          <span style="color:#75715e">#   25.15% of all dTLB cache hits </span>
+</span></span><span style="display:flex;"><span>       194,919,514      dTLB-loads
+</span></span></code></pre></div><h2 id="cpu-cache">CPU Cache <a href="#cpu-cache" class="anchor">🔗</a></h2><p>Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That&rsquo;s why we have <a href="https://en.wikipedia.org/wiki/CPU_cache" target="_blank" rel="noopener">CPU cache</a>, which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.</p>
 <p>But since we only access each element once in this example, how can cache help? Turn out we don&rsquo;t load 1 element to the cache at one time, we load a cache line, which usually are 64 bytes. So everytime we access an element, it will load 15 other elements (assuming int is 32-bit) to the cache, speeding up the next 15 memory access if we iterate them in sequential order.</p>
 <p>You can check the cache miss number with below commands:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ perf stat -e LLC-load-misses,LLC-loads,cache-misses,cache-references,L1-dcache-load-misses,L1-dcache-loads &lt;program&gt;
-</code></pre></div><p>where <code>LLC</code> is last level cache, <code>L1-dcache</code> is L1 data cache.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192&#39;</span>:
-
-         2,352,992      LLC-load-misses           <span style="color:#75715e">#   77.87% of all LL-cache hits</span>
-         3,021,610      LLC-loads
-       202,095,479      cache-misses              <span style="color:#75715e">#   68.146 % of all cache refs</span>  
-       296,563,720      cache-references
-       146,312,615      L1-dcache-load-misses     <span style="color:#75715e">#    3.36% of all L1-dcache hits</span>
-     4,360,007,818      L1-dcache-loads
-
-
-<span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192&#39;</span>:
-
-        64,697,884      LLC-load-misses           <span style="color:#75715e">#   63.72% of all LL-cache hits</span>
-       101,542,342      LLC-loads
-        92,728,013      cache-misses              <span style="color:#75715e">#   29.577 % of all cache refs</span>  
-       313,512,368      cache-references
-       195,821,883      L1-dcache-load-misses     <span style="color:#75715e">#   98.11% of all L1-dcache hits</span>
-       199,602,098      L1-dcache-loads
-</code></pre></div><p><strong>NOTE</strong>: since google benchmark run the code multiple times, we cannot compare the absolute value here, only the percentage of cache misses matter.</p>
-<p>You can see that <code>L1-dcache-load-misses</code> in loop#1 is much smaller compared to loop#2 (3% vs 98% miss rate). There are some weird stuff going on with <code>cache-misses</code> and <code>cache-references</code> though. Despite the name, it is actually LLC Reference (r4f2e) and LLC Misses (r412e). But I am not sure what is the differences between that and LLC-load and LLC-loads-misses (<strong>TODO</strong>).</p>
-<h2 id="cache-prefetching">Cache Prefetching</h2>
-<p>You might realize something is off by looking at above number. How can number of cache misses are so small compared to 1:15 ratio? Again, CPU is one step ahead of us. It has something called <a href="https://en.wikipedia.org/wiki/Cache_prefetching" target="_blank" rel="noopener">prefetcher</a> which will try to find out the memory access pattern to predict the next memory access, fetching them into the cache before we even access them.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ perf stat -e L1-dcache-load-misses,L1-dcache-loads &lt;program&gt;
+</span></span></code></pre></div><p>where <code>LLC</code> is last level cache, <code>L1-dcache</code> is L1 data cache.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192&#39;</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>       146,312,615      L1-dcache-load-misses     <span style="color:#75715e">#    3.36% of all L1-dcache hits</span>
+</span></span><span style="display:flex;"><span>     4,360,007,818      L1-dcache-loads
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192&#39;</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>       195,821,883      L1-dcache-load-misses     <span style="color:#75715e">#   98.11% of all L1-dcache hits</span>
+</span></span><span style="display:flex;"><span>       199,602,098      L1-dcache-loads
+</span></span></code></pre></div><p>You can see that <code>L1-dcache-load-misses</code> in loop#1 is much smaller compared to loop#2 (3% vs 98% miss rate). There are some weird stuff going on with <code>cache-misses</code> and <code>cache-references</code> though. Despite the name, it is actually LLC Reference (r4f2e) and LLC Misses (r412e). But I am not sure what is the differences between that and LLC-load and LLC-loads-misses (<strong>TODO</strong>).</p>
+<h2 id="cache-prefetching">Cache Prefetching <a href="#cache-prefetching" class="anchor">🔗</a></h2><p>You might realize something is off by looking at above number. How can number of cache misses are so small compared to 1:15 ratio? Again, CPU is one step ahead of us. It has something called <a href="https://en.wikipedia.org/wiki/Cache_prefetching" target="_blank" rel="noopener">prefetcher</a> which will try to find out the memory access pattern to predict the next memory access, fetching them into the cache before we even access them.</p>
 <p>To test this, you can make each array element 64 bytes, which is equal to the cache line, to see if the miss rate is the same between loop#1 and loop#2. <code>perf</code> also has some performance counter related to that; e.g. LLC-prefetches, L1-dcache-prefetches, etc; but I haven&rsquo;t been able to test on a CPU that support those counters yet (<strong>TODO</strong>)</p>
-<h2 id="compiler-optimization">Compiler Optimization</h2>
-<p>Iterating through the data sequentially also makes the compiler&rsquo;s job easier. One important optimization is auto vectorization, which will enable instruction level parallelism. You can see it in action in the below examples:</p>
+<h2 id="compiler-optimization">Compiler Optimization <a href="#compiler-optimization" class="anchor">🔗</a></h2><p>Iterating through the data sequentially also makes the compiler&rsquo;s job easier. One important optimization is <a href="https://en.wikipedia.org/wiki/Automatic_vectorization" target="_blank" rel="noopener">auto vectorization</a>, which will use vector instructions, which operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:</p>
 <ul>
-<li>GCC: <a href="https://godbolt.org/z/GWq55rsTr">https://godbolt.org/z/GWq55rsTr</a></li>
-<li>Clang: <a href="https://godbolt.org/z/4Tcsodf8s">https://godbolt.org/z/4Tcsodf8s</a></li>
+<li>GCC: <a href="https://godbolt.org/z/GWq55rsTr" target="_blank" rel="noopener">https://godbolt.org/z/GWq55rsTr</a></li>
+<li>Clang: <a href="https://godbolt.org/z/4Tcsodf8s" target="_blank" rel="noopener">https://godbolt.org/z/4Tcsodf8s</a></li>
 </ul>
-<p>In GCC, loop #1 sum 4 elements at once, while loop#2 add to the sum one by one.</p>
-<h2 id="references">References</h2>
+<p>In GCC, loop #1 sum multiple elements at once (see the instructions with <code>xmm</code> registers), while loop#2 add to the sum one by one.</p>
+<h2 id="what-else">What else? <a href="#what-else" class="anchor">🔗</a></h2><p>Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don&rsquo;t know for if there is an easy way to determine that. One thing we can do is to eliminiate all the above problems and then see if the speed is the same.</p>
+<p>Here are what we can do:</p>
 <ul>
+<li><a href="https://downloadmoreram.com/" target="_blank" rel="noopener">Donwload more RAM</a> to prevent major page fault.</li>
+<li>Prefault the page with <a href="https://man7.org/linux/man-pages/man3/bzero.3.html" target="_blank" rel="noopener"><code>explicit_bzero</code></a> to prevent minor page fault.</li>
+<li>Use <a href="https://www.kernel.org/doc/html/latest/admin-guide/mm/hugetlbpage.html" target="_blank" rel="noopener">huge page</a> to reduce TLB misses.</li>
+<li>Add padding bytes to make sure each element is in 1 cache line.</li>
+<li>Flush all caches between runs</li>
+<li>Disable all CPU prefetch. You can do that via BIOS (in my machine, I disabled Adjacent Cache Line Prefetch, and Hardware Prefetch) or <a href="https://en.wikipedia.org/wiki/Model-specific_register" target="_blank" rel="noopener">MSR</a> if supported.</li>
+<li>Disable vectorization optimization. In GCC, you can use <code>__attribute__((optimize(&quot;no-tree-vectorize&quot;)))</code>.</li>
+</ul>
+<p>After all of that, you can have something like <a href="https://github.com/hgminh95/which_loop_is_faster/blob/master/loop_what_else.cpp" target="_blank" rel="noopener">this</a>. Let&rsquo;s see the result</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ ./bazel-bin/bm_loop_what_else --benchmark_filter<span style="color:#f92672">=</span>BM_Loop.*/64
+</span></span><span style="display:flex;"><span>2022-04-02T20:11:07+08:00
+</span></span><span style="display:flex;"><span>Running ./bazel-bin/bm_loop_what_else
+</span></span><span style="display:flex;"><span>Run on <span style="color:#f92672">(</span><span style="color:#ae81ff">6</span> X 4359.9 MHz CPU s<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>CPU Caches:
+</span></span><span style="display:flex;"><span>  L1 Data <span style="color:#ae81ff">32</span> KiB <span style="color:#f92672">(</span>x6<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  L1 Instruction <span style="color:#ae81ff">32</span> KiB <span style="color:#f92672">(</span>x6<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  L2 Unified <span style="color:#ae81ff">256</span> KiB <span style="color:#f92672">(</span>x6<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  L3 Unified <span style="color:#ae81ff">12288</span> KiB <span style="color:#f92672">(</span>x1<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Load Average: 0.78, 0.63, 0.47
+</span></span><span style="display:flex;"><span>--------------------------------------------------------------------
+</span></span><span style="display:flex;"><span>Benchmark                          Time             CPU   Iterations
+</span></span><span style="display:flex;"><span>--------------------------------------------------------------------
+</span></span><span style="display:flex;"><span>BM_LoopNo1/64/manual_time       <span style="color:#ae81ff">6894</span> ns        <span style="color:#ae81ff">47600</span> ns       <span style="color:#ae81ff">101546</span>
+</span></span><span style="display:flex;"><span>BM_LoopNo2/64/manual_time       <span style="color:#ae81ff">8360</span> ns        <span style="color:#ae81ff">49097</span> ns        <span style="color:#ae81ff">84305</span>
+</span></span></code></pre></div><p>Loop #2 is still slower and I have no idea why 😢. If you have any idea on why that is the case, let me know in the comment below.</p>
+<h2 id="references">References <a href="#references" class="anchor">🔗</a></h2><ul>
 <li><a href="https://docs.kernel.org/vm/index.html" target="_blank" rel="noopener">Linux Virtual Memory</a></li>
 <li><a href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-system-programming-manual-325384.pdf" target="_blank" rel="noopener">Intel Software Developer&rsquo;s Manual Volume 3</a></li>
 <li><a href="https://llvm.org/docs/Vectorizers.html" target="_blank" rel="noopener">Clang Vectorization</a></li>
@@ -220,6 +245,17 @@ BM_LoopNo2/8192             <span style="color:#ae81ff">794375658</span> ns    <
     
     
     
+<div id="hyvor-talk-view"></div>
+<script type="text/javascript">
+    var HYVOR_TALK_WEBSITE = 6758;
+    var HYVOR_TALK_CONFIG = {
+        url: false,
+        id: false
+    };
+</script>
+<script async type="text/javascript" src="//talk.hyvor.com/web-api/embed.js"></script>
+
+
 
 </section>
 

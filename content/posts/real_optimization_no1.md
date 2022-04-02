@@ -1,7 +1,7 @@
 ---
 title: "Optimization in Real Code No. 1"
 date: 2022-03-24T00:38:02+08:00
-draft: false
+draft: true
 ---
 
 Just a note on some optimization found in the wild.

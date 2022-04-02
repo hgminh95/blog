@@ -1,6 +1,11 @@
 {{ if or (and .Site.Params.enableComments (ne .Params.enableComments false)) (eq .Params.enableComments true) }}
-  <div id="comment">
-    <!-- https://gohugo.io/templates/internal/#use-the-disqus-template -->
-    {{ template "_internal/disqus.html" . }}
-  </div>
+<div id="hyvor-talk-view"></div>
+<script type="text/javascript">
+    var HYVOR_TALK_WEBSITE = 6758;
+    var HYVOR_TALK_CONFIG = {
+        url: false,
+        id: false
+    };
+</script>
+<script async type="text/javascript" src="//talk.hyvor.com/web-api/embed.js"></script>
 {{ end }}

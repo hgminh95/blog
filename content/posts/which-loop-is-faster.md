@@ -24,30 +24,30 @@ for (int i = 0; i < N; ++i)
     sum += a[j * N + i];
 ```
 
-I have run it and here is the result (you can find the code at [Github](https://github.com/hgminh95/which_loop_is_faster) - it is not exactly the same but should be close enough for this discussion)
+I have run it and here is the result (you can find the code on [Github](https://github.com/hgminh95/which_loop_is_faster) - it is not exactly the same but should be close enough for this discussion)
 
 ```bash
----------------------------------------------------------------------
-Benchmark                           Time             CPU   Iterations
----------------------------------------------------------------------
-BM_LoopNo1/16                     131 ns          108 ns      8960000
-BM_LoopNo1/64                    1965 ns         1726 ns       407273
-BM_LoopNo1/512                 129987 ns        97656 ns         5600
-BM_LoopNo1/4096               9786057 ns      8789062 ns          112
-BM_LoopNo1/8192              39223035 ns     21354167 ns           30
-BM_LoopNo2/16                     128 ns         73.4 ns     10000000
-BM_LoopNo2/64                    1975 ns         1420 ns       407273
-BM_LoopNo2/512                 784854 ns       619071 ns         1792
-BM_LoopNo2/4096             139502128 ns    111111111 ns            9
-BM_LoopNo2/8192             794375658 ns    656250000 ns            1
+----------------------------------------------------------------------------
+Benchmark                                  Time             CPU   Iterations
+----------------------------------------------------------------------------
+BM_LoopNo1/16                            119 ns          119 ns      5831556
+BM_LoopNo1/64                           1852 ns         1854 ns       377141
+BM_LoopNo1/512                        118845 ns       118953 ns         5832
+BM_LoopNo1/4096                      9011987 ns      9019854 ns           80
+BM_LoopNo1/8192                     36637359 ns     36666974 ns           18
+BM_LoopNo2/16                            124 ns          124 ns      5577102
+BM_LoopNo2/64                           2011 ns         2012 ns       349585
+BM_LoopNo2/512                        851109 ns       851729 ns          810
+BM_LoopNo2/4096                    153951705 ns    154055943 ns            4
+BM_LoopNo2/8192                    801699400 ns    802239396 ns            1
 ```
 
 You can clearly see that loop #1 is faster. Now, let's find out why that is the case.
 
-**NOTE**:
+**NOTES**:
 
-- In this blog we use [Google Benchmark Library](https://github.com/google/benchmark) to run benchmark code and [perf](https://perf.wiki.kernel.org/index.php/Main_Page) to collect performance counters from kernel and CPU. You can check them out if you are not familiar.
-- I uses Linux and Intel CPU for this. Other platforms might be different.
+- In this blog, I use [Google Benchmark Library](https://github.com/google/benchmark) to run benchmark code and [perf](https://perf.wiki.kernel.org/index.php/Main_Page) to collect performance counters from kernel and CPU. You can check them out if you are not familiar.
+- All examples are run under Linux and Intel CPU. Other platforms might show different results.
 
 ## Page fault
 
@@ -62,20 +62,20 @@ $ perf stat -e page-faults,minor-faults,major-faults <program>
 Where `minor-faults` is when the page is in memory but is not allocated to the process or not registed to the memory management unit (e.g. when you first access the memory), `major-faults` is when the page is not in main memory (that is very costly operation since we might need to read the memory from disk), and `page-faults` is sum of them. Below is one possible result,
 
 ```bash
-'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1WithPageFault':
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1Long':
 
            785,074      page-faults
             33,743      major-faults
            751,331      minor-faults
 
-'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2WithPageFault':
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2Long`':
 
            579,736      page-faults
            157,724      major-faults
            422,012      minor-faults
 ```
 
-**NOTE**:
+**NOTES**:
 - I wrote a [small utility](https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp) to lock abitrary amount of memory in RAM, to simulate the low memory scenario.
 
 ## TLB misses
@@ -120,20 +120,19 @@ where `LLC` is last level cache, `L1-dcache` is L1 data cache.
 
 
 ```bash
-'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1/8192':
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1Long':
 
-       146,312,615      L1-dcache-load-misses     #    3.36% of all L1-dcache hits
-     4,360,007,818      L1-dcache-loads
+        36,969,006      L1-dcache-load-misses     #    4.77% of all L1-dcache hits  
+       774,500,777      L1-dcache-loads
 
 
-'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2/8192':
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2Long':
 
-       195,821,883      L1-dcache-load-misses     #   98.11% of all L1-dcache hits
-       199,602,098      L1-dcache-loads
+       781,431,687      L1-dcache-load-misses     #  100.77% of all L1-dcache hits  
+       775,442,911      L1-dcache-loads
 ```
 
 You can see that `L1-dcache-load-misses` in loop#1 is much smaller compared to loop#2 (3% vs 98% miss rate). There are some weird stuff going on with `cache-misses` and `cache-references` though. Despite the name, it is actually LLC Reference (r4f2e) and LLC Misses (r412e). But I am not sure what is the differences between that and LLC-load and LLC-loads-misses (**TODO**).
-
 
 ## Cache Prefetching
 

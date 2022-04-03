@@ -116,7 +116,7 @@ You can check the cache miss number with below commands:
 $ perf stat -e L1-dcache-load-misses,L1-dcache-loads <program>
 ```
 
-where `LLC` is last level cache, `L1-dcache` is L1 data cache.
+where `L1-dcache-loads` is number of time we try to load data from L1 cache, and `L1-dcache-load-misses` is the number of it fails to do so.
 
 
 ```bash
@@ -132,7 +132,10 @@ where `LLC` is last level cache, `L1-dcache` is L1 data cache.
        775,442,911      L1-dcache-loads
 ```
 
-You can see that `L1-dcache-load-misses` in loop#1 is much smaller compared to loop#2 (3% vs 98% miss rate). There are some weird stuff going on with `cache-misses` and `cache-references` though. Despite the name, it is actually LLC Reference (r4f2e) and LLC Misses (r412e). But I am not sure what is the differences between that and LLC-load and LLC-loads-misses (**TODO**).
+**NOTES**:
+
+- You might notice that the original benchmark code has some flaws. The cache line between runs is not flushed, so it could affect the benchmark result a little bit. In this example, I only run the the code once to make sure it won't affect the result.
+- `L1-dcache-load-misses` are bigger than `L1-dcache-modes` in the second examples, which seems quite weird. Turn outs, those cache related parameters can be a bit misleading sometimes. This [blog](https://sites.utexas.edu/jdm4372/2013/07/14/notes-on-the-mystery-of-hardware-cache-performance-counters/) might shed some lights into this.
 
 ## Cache Prefetching
 
@@ -142,7 +145,7 @@ To test this, you can make each array element 64 bytes, which is equal to the ca
 
 ## Compiler Optimization
 
-Iterating through the data sequentially also makes the compiler's job easier. One important optimization is [auto vectorization](https://en.wikipedia.org/wiki/Automatic_vectorization), which will use vector instructions, which operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:
+Iterating through the data sequentially also makes the compiler's job easier. One important optimization is [auto vectorization](https://en.wikipedia.org/wiki/Automatic_vectorization), which will use vector instructions. These instructions operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:
 
 - GCC: https://godbolt.org/z/GWq55rsTr
 - Clang: https://godbolt.org/z/4Tcsodf8s
@@ -151,7 +154,7 @@ In GCC, loop #1 sum multiple elements at once (see the instructions with `xmm` r
 
 ## What else?
 
-Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don't know for if there is an easy way to determine that. One thing we can do is to eliminiate all the above problems and then see if the speed is the same.
+Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don't know for if there is an easy way to determine that. One thing we can do is to eliminiate all the above problems and then see if the speed of these 2 loops are the same.
 
 Here are what we can do:
 
@@ -183,7 +186,7 @@ BM_LoopNo1/64/manual_time       6894 ns        47600 ns       101546
 BM_LoopNo2/64/manual_time       8360 ns        49097 ns        84305
 ```
 
-Loop #2 is still slower and I have no idea why 😢. If you have any idea on why that is the case, let me know in the comment below.
+Loop #2 is still slower and I have no idea why 😢. If you know why that is the case, let me know in the comment below.
 
 ## References
 

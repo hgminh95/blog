@@ -67,7 +67,7 @@
           ·
         </span>
         <span>
-          1333 words
+          1373 words
         </span>
         <span class="split">
           ·
@@ -133,7 +133,7 @@
 </span></span><span style="display:flex;"><span>BM_LoopNo2/512                        <span style="color:#ae81ff">851109</span> ns       <span style="color:#ae81ff">851729</span> ns          <span style="color:#ae81ff">810</span>
 </span></span><span style="display:flex;"><span>BM_LoopNo2/4096                    <span style="color:#ae81ff">153951705</span> ns    <span style="color:#ae81ff">154055943</span> ns            <span style="color:#ae81ff">4</span>
 </span></span><span style="display:flex;"><span>BM_LoopNo2/8192                    <span style="color:#ae81ff">801699400</span> ns    <span style="color:#ae81ff">802239396</span> ns            <span style="color:#ae81ff">1</span>
-</span></span></code></pre></div><p>You can clearly see that loop #1 is faster. Now, let&rsquo;s find out why that is the case.</p>
+</span></span></code></pre></div><p>You can clearly see that loop #1 is faster, and by a large margin. Now, let&rsquo;s find out why that is the case.</p>
 <p><strong>NOTES</strong>:</p>
 <ul>
 <li>In this blog, I use <a href="https://github.com/google/benchmark" target="_blank" rel="noopener">Google Benchmark Library</a> to run benchmark code and <a href="https://perf.wiki.kernel.org/index.php/Main_Page" target="_blank" rel="noopener">perf</a> to collect performance counters from kernel and CPU. You can check them out if you are not familiar.</li>
@@ -149,7 +149,7 @@
 </span></span><span style="display:flex;"><span>            33,743      major-faults
 </span></span><span style="display:flex;"><span>           751,331      minor-faults
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2Long`&#39;</span>:
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2Long&#39;</span>:
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>           579,736      page-faults
 </span></span><span style="display:flex;"><span>           157,724      major-faults
@@ -158,7 +158,7 @@
 <ul>
 <li>I wrote a <a href="https://github.com/hgminh95/which_loop_is_faster/blob/master/lock_mem.cpp" target="_blank" rel="noopener">small utility</a> to lock abitrary amount of memory in RAM, to simulate the low memory scenario.</li>
 </ul>
-<h2 id="tlb-misses">TLB misses <a href="#tlb-misses" class="anchor">🔗</a></h2><p>The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the <a href="https://en.wikipedia.org/wiki/Page_tabl" target="_blank" rel="noopener">page table</a> (depsite the name, it is actually like a tree, hence &ldquo;walking&rdquo;). Since page table can be very large (say we have 16GB of RAM, which each page is 4KB, you do the math), we have something called <a href="https://en.wikipedia.org/wiki/Translation_lookaside_buffer" target="_blank" rel="noopener">Translation Lookaside Buffer or TLB</a> to cache the page table. TLB miss happen when we try to access a page which is not in TLB.</p>
+<h2 id="tlb-misses">TLB misses <a href="#tlb-misses" class="anchor">🔗</a></h2><p>The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the <a href="https://en.wikipedia.org/wiki/Page_tabl" target="_blank" rel="noopener">page table</a> (depsite the name, it is actually like a tree, hence &ldquo;walking&rdquo;). Since page table can be very large (say we have 16GB of RAM, and each page is 4KB, you do the math), we have something called <a href="https://en.wikipedia.org/wiki/Translation_lookaside_buffer" target="_blank" rel="noopener">Translation Lookaside Buffer or TLB</a> to cache the page table. TLB miss happen when we try to access a page which is not in TLB.</p>
 <p>Again, going back and forth between different pages won&rsquo;t help in this case either.</p>
 <p>To see number of TLB misses, you can run below commands:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ perf stat -e dTLB-loads,dTLB-load-misses &lt;program&gt;
@@ -172,11 +172,15 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>        49,024,649      dTLB-load-misses          <span style="color:#75715e">#   25.15% of all dTLB cache hits </span>
 </span></span><span style="display:flex;"><span>       194,919,514      dTLB-loads
-</span></span></code></pre></div><h2 id="cpu-cache">CPU Cache <a href="#cpu-cache" class="anchor">🔗</a></h2><p>Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That&rsquo;s why we have <a href="https://en.wikipedia.org/wiki/CPU_cache" target="_blank" rel="noopener">CPU cache</a>, which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.</p>
+</span></span></code></pre></div><p><strong>NOTES</strong>:</p>
+<ul>
+<li>The absolute value is not very useful on this case, because Google Benchmark run it multiple times until it reachs statistical significiant. You should look into percentage of dTLB miss in this case.</li>
+</ul>
+<h2 id="cpu-cache">CPU Cache <a href="#cpu-cache" class="anchor">🔗</a></h2><p>Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That&rsquo;s why we have <a href="https://en.wikipedia.org/wiki/CPU_cache" target="_blank" rel="noopener">CPU cache</a>, which caceh the memory inside the CPU, making subsequence accesses faster. There are multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.</p>
 <p>But since we only access each element once in this example, how can cache help? Turn out we don&rsquo;t load 1 element to the cache at one time, we load a cache line, which usually are 64 bytes. So everytime we access an element, it will load 15 other elements (assuming int is 32-bit) to the cache, speeding up the next 15 memory access if we iterate them in sequential order.</p>
-<p>You can check the cache miss number with below commands:</p>
+<p>You can check the L1 cache miss number with below commands:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ perf stat -e L1-dcache-load-misses,L1-dcache-loads &lt;program&gt;
-</span></span></code></pre></div><p>where <code>L1-dcache-loads</code> is number of time we try to load data from L1 cache, and <code>L1-dcache-load-misses</code> is the number of it fails to do so.</p>
+</span></span></code></pre></div><p>where <code>L1-dcache-loads</code> is number of time we try to load data from L1 cache, and <code>L1-dcache-load-misses</code> is the number of time it fails to do so.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#e6db74">&#39;./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo1Long&#39;</span>:
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>        36,969,006      L1-dcache-load-misses     <span style="color:#75715e">#    4.77% of all L1-dcache hits  </span>
@@ -194,19 +198,19 @@
 </ul>
 <h2 id="cache-prefetching">Cache Prefetching <a href="#cache-prefetching" class="anchor">🔗</a></h2><p>You might realize something is off by looking at above number. How can number of cache misses are so small compared to 1:15 ratio? Again, CPU is one step ahead of us. It has something called <a href="https://en.wikipedia.org/wiki/Cache_prefetching" target="_blank" rel="noopener">prefetcher</a> which will try to find out the memory access pattern to predict the next memory access, fetching them into the cache before we even access them.</p>
 <p>To test this, you can make each array element 64 bytes, which is equal to the cache line, to see if the miss rate is the same between loop#1 and loop#2. <code>perf</code> also has some performance counter related to that; e.g. LLC-prefetches, L1-dcache-prefetches, etc; but I haven&rsquo;t been able to test on a CPU that support those counters yet (<strong>TODO</strong>)</p>
-<h2 id="compiler-optimization">Compiler Optimization <a href="#compiler-optimization" class="anchor">🔗</a></h2><p>Iterating through the data sequentially also makes the compiler&rsquo;s job easier. One important optimization is <a href="https://en.wikipedia.org/wiki/Automatic_vectorization" target="_blank" rel="noopener">auto vectorization</a>, which will use vector instructions. These instructions operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:</p>
+<h2 id="compiler-optimization">Compiler Optimization <a href="#compiler-optimization" class="anchor">🔗</a></h2><p>Iterating through the data sequentially also makes the compiler&rsquo;s job easier. One important optimization is <a href="https://en.wikipedia.org/wiki/Automatic_vectorization" target="_blank" rel="noopener">auto vectorization</a>, which use vector instructions. These instructions operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:</p>
 <ul>
 <li>GCC: <a href="https://godbolt.org/z/GWq55rsTr" target="_blank" rel="noopener">https://godbolt.org/z/GWq55rsTr</a></li>
 <li>Clang: <a href="https://godbolt.org/z/4Tcsodf8s" target="_blank" rel="noopener">https://godbolt.org/z/4Tcsodf8s</a></li>
 </ul>
 <p>In GCC, loop #1 sum multiple elements at once (see the instructions with <code>xmm</code> registers), while loop#2 add to the sum one by one.</p>
-<h2 id="what-else">What else? <a href="#what-else" class="anchor">🔗</a></h2><p>Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don&rsquo;t know for if there is an easy way to determine that. One thing we can do is to eliminiate all the above problems and then see if the speed of these 2 loops are the same.</p>
+<h2 id="what-else">What else? <a href="#what-else" class="anchor">🔗</a></h2><p>Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don&rsquo;t know for if there is an easy way to determine that. One thing we can do is to eliminate all the above problems and then see if the speed of these 2 loops are the same.</p>
 <p>Here are what we can do:</p>
 <ul>
 <li><a href="https://downloadmoreram.com/" target="_blank" rel="noopener">Donwload more RAM</a> to prevent major page fault.</li>
 <li>Prefault the page with <a href="https://man7.org/linux/man-pages/man3/bzero.3.html" target="_blank" rel="noopener"><code>explicit_bzero</code></a> to prevent minor page fault.</li>
 <li>Use <a href="https://www.kernel.org/doc/html/latest/admin-guide/mm/hugetlbpage.html" target="_blank" rel="noopener">huge page</a> to reduce TLB misses.</li>
-<li>Add padding bytes to make sure each element is in 1 cache line.</li>
+<li>Add padding bytes to make sure each element is in separated cache line.</li>
 <li>Flush all caches between runs</li>
 <li>Disable all CPU prefetch. You can do that via BIOS (in my machine, I disabled Adjacent Cache Line Prefetch, and Hardware Prefetch) or <a href="https://en.wikipedia.org/wiki/Model-specific_register" target="_blank" rel="noopener">MSR</a> if supported.</li>
 <li>Disable vectorization optimization. In GCC, you can use <code>__attribute__((optimize(&quot;no-tree-vectorize&quot;)))</code>.</li>

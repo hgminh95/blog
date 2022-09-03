@@ -42,7 +42,7 @@ BM_LoopNo2/4096                    153951705 ns    154055943 ns            4
 BM_LoopNo2/8192                    801699400 ns    802239396 ns            1
 ```
 
-You can clearly see that loop #1 is faster. Now, let's find out why that is the case.
+You can clearly see that loop #1 is faster, and by a large margin. Now, let's find out why that is the case.
 
 **NOTES**:
 
@@ -68,7 +68,7 @@ Where `minor-faults` is when the page is in memory but is not allocated to the p
             33,743      major-faults
            751,331      minor-faults
 
-'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2Long`':
+'./bazel-bin/bm_loop --benchmark_filter=BM_LoopNo2Long':
 
            579,736      page-faults
            157,724      major-faults
@@ -80,7 +80,7 @@ Where `minor-faults` is when the page is in memory but is not allocated to the p
 
 ## TLB misses
 
-The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the [page table](https://en.wikipedia.org/wiki/Page_tabl) (depsite the name, it is actually like a tree, hence "walking"). Since page table can be very large (say we have 16GB of RAM, which each page is 4KB, you do the math), we have something called [Translation Lookaside Buffer or TLB](https://en.wikipedia.org/wiki/Translation_lookaside_buffer) to cache the page table. TLB miss happen when we try to access a page which is not in TLB.
+The address refered by the application is virtual address. To access the memory, we actually need to translate them into physical address, by walking through the [page table](https://en.wikipedia.org/wiki/Page_tabl) (depsite the name, it is actually like a tree, hence "walking"). Since page table can be very large (say we have 16GB of RAM, and each page is 4KB, you do the math), we have something called [Translation Lookaside Buffer or TLB](https://en.wikipedia.org/wiki/Translation_lookaside_buffer) to cache the page table. TLB miss happen when we try to access a page which is not in TLB.
 
 Again, going back and forth between different pages won't help in this case either.
 
@@ -104,19 +104,23 @@ where `dTLB` is data TLB (there is `iTLB` for instruction), and `load-misses` me
        194,919,514      dTLB-loads
 ```
 
+**NOTES**:
+
+- The absolute value is not very useful on this case, because Google Benchmark run it multiple times until it reachs statistical significiant. You should look into percentage of dTLB miss in this case.
+
 ## CPU Cache
 
-Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That's why we have [CPU cache](https://en.wikipedia.org/wiki/CPU_cache), which will store the memory inside the CPU, making subsequence accesses faster. There multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.
+Fetching memory from RAM is actually very slow, it could cost hundreds of clock cycles. That's why we have [CPU cache](https://en.wikipedia.org/wiki/CPU_cache), which caceh the memory inside the CPU, making subsequence accesses faster. There are multiple levels of CPU cache (e.g. L1, L2, L3), with increasing latency and capacity.
 
 But since we only access each element once in this example, how can cache help? Turn out we don't load 1 element to the cache at one time, we load a cache line, which usually are 64 bytes. So everytime we access an element, it will load 15 other elements (assuming int is 32-bit) to the cache, speeding up the next 15 memory access if we iterate them in sequential order.
 
-You can check the cache miss number with below commands:
+You can check the L1 cache miss number with below commands:
 
 ```bash
 $ perf stat -e L1-dcache-load-misses,L1-dcache-loads <program>
 ```
 
-where `L1-dcache-loads` is number of time we try to load data from L1 cache, and `L1-dcache-load-misses` is the number of it fails to do so.
+where `L1-dcache-loads` is number of time we try to load data from L1 cache, and `L1-dcache-load-misses` is the number of time it fails to do so.
 
 
 ```bash
@@ -145,7 +149,7 @@ To test this, you can make each array element 64 bytes, which is equal to the ca
 
 ## Compiler Optimization
 
-Iterating through the data sequentially also makes the compiler's job easier. One important optimization is [auto vectorization](https://en.wikipedia.org/wiki/Automatic_vectorization), which will use vector instructions. These instructions operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:
+Iterating through the data sequentially also makes the compiler's job easier. One important optimization is [auto vectorization](https://en.wikipedia.org/wiki/Automatic_vectorization), which use vector instructions. These instructions operate at multiple elements at a time, potentially speeding up the program multiple times. You can see it in action in the below examples:
 
 - GCC: https://godbolt.org/z/GWq55rsTr
 - Clang: https://godbolt.org/z/4Tcsodf8s
@@ -154,14 +158,14 @@ In GCC, loop #1 sum multiple elements at once (see the instructions with `xmm` r
 
 ## What else?
 
-Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don't know for if there is an easy way to determine that. One thing we can do is to eliminiate all the above problems and then see if the speed of these 2 loops are the same.
+Is there anything else that could cause the speed differences? That is a common problem that I encounter a lot. Unfortunately, I don't know for if there is an easy way to determine that. One thing we can do is to eliminate all the above problems and then see if the speed of these 2 loops are the same.
 
 Here are what we can do:
 
 - [Donwload more RAM](https://downloadmoreram.com/) to prevent major page fault.
 - Prefault the page with [`explicit_bzero`](https://man7.org/linux/man-pages/man3/bzero.3.html) to prevent minor page fault.
 - Use [huge page](https://www.kernel.org/doc/html/latest/admin-guide/mm/hugetlbpage.html) to reduce TLB misses.
-- Add padding bytes to make sure each element is in 1 cache line.
+- Add padding bytes to make sure each element is in separated cache line.
 - Flush all caches between runs
 - Disable all CPU prefetch. You can do that via BIOS (in my machine, I disabled Adjacent Cache Line Prefetch, and Hardware Prefetch) or [MSR](https://en.wikipedia.org/wiki/Model-specific_register) if supported.
 - Disable vectorization optimization. In GCC, you can use `__attribute__((optimize("no-tree-vectorize")))`.

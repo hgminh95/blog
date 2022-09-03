@@ -6,7 +6,16 @@
     <description>Recent content on hgminh&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 23 Mar 2022 20:54:08 +0800</lastBuildDate><atom:link href="https://hgminh.dev/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 03 Sep 2022 00:38:02 +0800</lastBuildDate><atom:link href="https://hgminh.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bookmark (WIP)</title>
+      <link>https://hgminh.dev/posts/bookmark-wip/</link>
+      <pubDate>Sat, 03 Sep 2022 00:38:02 +0800</pubDate>
+      
+      <guid>https://hgminh.dev/posts/bookmark-wip/</guid>
+      <description>&lt;p&gt;List of data structures, algorithm, design for common problems&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Which Loop Is Faster?</title>
       <link>https://hgminh.dev/posts/which-loop-is-faster/</link>

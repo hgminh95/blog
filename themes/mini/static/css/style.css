@@ -285,7 +285,7 @@ nav.navigation a.button {
 }
 
 #list-page .item {
-  margin: 12px 0;
+  margin: 36px 0;
 }
 
 #list-page .title {
@@ -320,7 +320,7 @@ nav.navigation a.button {
   margin-top: 12px;
   word-break: normal;
   overflow-wrap: anywhere;
-  margin-bottom: 36px;
+  margin-bottom: 12px;
 }
 
 #list-page .cover {
@@ -390,14 +390,14 @@ nav.navigation a.button {
 #single .tags {
   margin-top: 24px;
 }
-#single .tags a {
+.tags a {
   background: #f2f2f2;
   padding: 4px 7px;
   color: #757575;
   font-size: 14px;
   margin-right: 3px;
 }
-#single .tags a:hover {
+.tags a:hover {
   color: #0366d6;
 }
 

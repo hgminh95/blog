@@ -27,6 +27,11 @@ List of data structures, algorithm, design for common problems
 - rigtorp ring buffer - https://rigtorp.se/ringbuffer/
 - 1024cores MPMC queue - https://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue
 
+## Indexing
+
+- The Ubiquitous B-Tree - http://carlosproal.com/ir/papers/p121-comer.pdf
+- Log Structured Merge Tree (LSM Tree) - https://www.google.com/search?q=log+structured+merge+tree&oq=log+structured+merge+tree&aqs=chrome..69i57j35i39l2j0i512l7.2934j0j7&sourceid=chrome&ie=UTF-8
+
 ## Large Data System
 
 - The Google File System - https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf

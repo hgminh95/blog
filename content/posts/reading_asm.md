@@ -4,7 +4,7 @@ date: 2022-09-17T00:38:02+08:00
 draft: false
 ---
 
-A quick tutorial on how to read ASM. Note that this is NOT a guide on how to read assembly code. Rather, it is to show how common C++ construct/routine is compiled into assembly. From there, it can help you reading asm faster.
+A quick post on how to read asm quickly as C++ developer. Note that this is NOT a guide on how to read assembly code. Rather, this post shows how common C++ constructs/routines are compiled into assembly. From there, it can help you reading asm faster.
 
 <!--more-->
 

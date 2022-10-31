@@ -27,3 +27,8 @@ params:
   links:
     - name: Github
       path: https://github.com/hgminh95/blog
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true

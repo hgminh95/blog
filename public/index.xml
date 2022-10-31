@@ -6,7 +6,16 @@
     <description>Recent content on hgminh&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 03 Sep 2022 00:38:02 +0800</lastBuildDate><atom:link href="https://hgminh.dev/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 17 Sep 2022 00:38:02 +0800</lastBuildDate><atom:link href="https://hgminh.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ASM for C&#43;&#43; developers</title>
+      <link>https://hgminh.dev/posts/asm-for-c-developers/</link>
+      <pubDate>Sat, 17 Sep 2022 00:38:02 +0800</pubDate>
+      
+      <guid>https://hgminh.dev/posts/asm-for-c-developers/</guid>
+      <description>&lt;p&gt;A quick tutorial on how to read ASM. Note that this is NOT a guide on how to read assembly code. Rather, it is to show how common C++ construct/routine is compiled into assembly. From there, it can help you reading asm faster.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Bookmark (WIP)</title>
       <link>https://hgminh.dev/posts/bookmark-wip/</link>

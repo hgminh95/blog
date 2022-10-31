@@ -8,7 +8,14 @@ A quick tutorial on how to read ASM. Note that this is NOT a guide on how to rea
 
 <!--more-->
 
-There are plenty of guides on assembly online, for example [here](https://www.cs.virginia.edu/~evans/cs216/guides/x86.html).
+There are plenty of guides on assembly online, for example [here](https://www.cs.virginia.edu/~evans/cs216/guides/x86.html)
+
+To get assembly generated from your code, you can
+
+- [Compiler Explorer](https://godbolt.org/)
+- [objdump](https://man7.org/linux/man-pages/man1/objdump.1.html) on object files (executables, shared library, static library, etc)
+- [gdb with layout asm](https://stackoverflow.com/questions/589653/switching-to-assembly-in-gdb)
+- [gcc -S](https://stackoverflow.com/questions/137038/how-do-you-get-assembler-output-from-c-c-source-in-gcc)
 
 ## Setup
 
@@ -82,6 +89,31 @@ foo():
   </tr>
 
   <tr class="mt-code">
+    <td><span class="comment">// Array literals</span>
+std::array&lt;int, 4&gt; a{1, 2, 3, 4};</td>
+    <td>.LC0:
+        .long   1
+        .long   2
+        .long   3
+        .long   4</td>
+  </tr>
+
+  <tr class="mt-code">
+    <td><a href="https://stackoverflow.com/questions/33666617/what-is-the-best-way-to-set-a-register-to-zero-in-x86-assembly-xor-mov-or-and/33668295#33668295">// Set a variable to 0</a>
+x = 0;</td>
+    <td>	xor   eax, eax</td>
+  </tr>
+
+  <tr class="mt-code">
+    <td><a href="https://stackoverflow.com/questions/41174867/whats-the-easiest-way-to-determine-if-a-registers-value-is-equal-to-zero-or-no">// Test if variable equals 0</a>
+return x == 0;</td>
+    <td>        xor     eax, eax
+        test    edi, edi
+        sete    al
+        ret</td>
+  </tr>
+
+  <tr class="mt-code">
     <td>struct A {
     int *x;
     A() {
@@ -128,6 +160,29 @@ foo() [clone .cold]:
         call    __cxa_guard_abort
         mov     rdi, rbx
         call    _Unwind_Resume</td>
+  </tr>
+
+  <tr class="mt-code">
+    <td><a href="https://stackoverflow.com/questions/72552/why-does-volatile-exist">// Volatile</a>
+void foo(volatile int &x, volatile int &y) {
+    y = x;
+    y = x;
+}<br/>
+void bar(int &x, int &y) {
+    y = x;
+    y = x;
+}
+    </td>
+    <td>foo(int volatile&, int volatile&):
+        mov     eax, DWORD PTR [rdi]
+        mov     DWORD PTR [rsi], eax
+        mov     eax, DWORD PTR [rdi]
+        mov     DWORD PTR [rsi], eax
+        ret
+bar(int&, int&):
+        mov     eax, DWORD PTR [rdi]
+        mov     DWORD PTR [rsi], eax
+        ret</td>
   </tr>
 
   <tr class="mt-code">
@@ -523,7 +578,16 @@ auto fp = ::open(path.c_str(), O_APPEND);
   </tr>
 
   <tr class="mt-title">
-    <td colspan="2">Synchronization</td>
+    <td colspan="2">Multi-threading</td>
+  </tr>
+
+  <tr class="mt-code">
+    <td>thread_local int x;
+...
+return x;</td>
+    <td>	<a href="https://stackoverflow.com/questions/10810203/what-is-the-fs-gs-register-intended-for">// fs register</a>
+	mov     eax, DWORD PTR fs:x@tpoff
+        ret</td>
   </tr>
 
   <tr class="mt-code">
@@ -642,16 +706,6 @@ bar(int) [clone .cold]:
   </tr>
 
   <tr class="mt-code">
-    <td>int foo(int a) {
-    while (a) {}
-    return 1;
-}</td>
-    <td>foo(int):
-        mov     eax, 1
-        ret</td>
-  </tr>
-
-  <tr class="mt-code">
     <td>long long sum = 0;
 for (int i = 0; i < n; ++i) {
     sum += i;
@@ -670,6 +724,16 @@ return sum;</td>
         xor     eax, eax
         ret
     </td>
+  </tr>
+
+  <tr class="mt-code">
+    <td>int foo(int a) {
+    while (a) {}
+    return 1;
+}</td>
+    <td>foo(int):
+        mov     eax, 1
+        ret</td>
   </tr>
 
   <tr class="mt-code">

@@ -1,6 +1,7 @@
 ---
 title: "Assembly for C++ developers"
 date: 2022-09-17T00:38:02+08:00
+thumbnail: assembly-for-c-developers.png
 draft: false
 ---
 

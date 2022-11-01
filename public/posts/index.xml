@@ -8,12 +8,12 @@
     <language>en-us</language>
     <lastBuildDate>Sat, 17 Sep 2022 00:38:02 +0800</lastBuildDate><atom:link href="https://hgminh.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>ASM for C&#43;&#43; developers</title>
-      <link>https://hgminh.dev/posts/asm-for-c-developers/</link>
+      <title>Assembly for C&#43;&#43; developers</title>
+      <link>https://hgminh.dev/posts/assembly-for-c-developers/</link>
       <pubDate>Sat, 17 Sep 2022 00:38:02 +0800</pubDate>
       
-      <guid>https://hgminh.dev/posts/asm-for-c-developers/</guid>
-      <description>&lt;p&gt;A quick post on how to read asm quickly as C++ developer. Note that this is NOT a guide on how to read assembly code. Rather, this post shows how common C++ constructs/routines are compiled into assembly. From there, it can help you reading asm faster.&lt;/p&gt;</description>
+      <guid>https://hgminh.dev/posts/assembly-for-c-developers/</guid>
+      <description>&lt;p&gt;A quick post on how to read assembly quickly as C++ developer. Note that this is NOT a guide on how to read assembly code. Rather, this post shows how common C++ constructs/routines are compiled into assembly. From there, it can help you to read asm faster.&lt;/p&gt;</description>
     </item>
     
     <item>

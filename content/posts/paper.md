@@ -1,5 +1,5 @@
 ---
-title: "Bookmark (WIP)"
+title: "Bookmarks (WIP)"
 date: 2022-09-03T00:38:02+08:00
 draft: false
 ---
@@ -12,6 +12,7 @@ List of data structures, algorithm, design for common problems
 
 - probablydance's series - https://probablydance.com/?s=hash 
 - Consistent Hashing - https://www.cs.princeton.edu/courses/archive/fall09/cos518/papers/chash.pdf
+- Google's Swiss Table - https://abseil.io/about/design/swisstables
 
 ## Memory Allocator
 
@@ -39,7 +40,7 @@ List of data structures, algorithm, design for common problems
 
 ## Data Aggregation
 
-- Hyperloglog: The analysis of a near-optimal cardinality estimation algorithm-  http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf
+- Hyperloglog: The analysis of a near-optimal cardinality estimation algorithm - http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf
 - Bloom filter - https://en.wikipedia.org/wiki/Bloom_filter
 - HdrHistogram: A High Dynamic Range (HDR) Histogram - https://github.com/HdrHistogram/HdrHistogram
 - The PageRank Citation Ranking: Bringing Order to the Web - http://ilpubs.stanford.edu:8090/422/1/1999-66.pdf
@@ -53,3 +54,12 @@ List of data structures, algorithm, design for common problems
 
 - fastrange: A fast alternative to the modulo reduction - https://github.com/lemire/fastrange
 - Small String Optimization - https://github.com/elliotgoodrich/SSO-23
+
+## General Hardwares
+
+- Branch Prediction - https://danluu.com/branch-prediction/
+- An Overview of On-Chip Cache Coherence Protocol - https://www.researchgate.net/profile/Zainab-Alwaisi/publication/362068592_An_Overview_of_On-Chip_Cache_Coherence_Protocols/links/5ad71029a6fdcc2935835926/An-Overview-of-On-Chip-Cache-Coherence-Protocols.pdf
+
+## Intel
+
+- How to Benchmark Code Execution Times on Intel® IA-32 and IA-64 Instruction Set Architectures - https://www.intel.de/content/dam/www/public/us/en/documents/white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf

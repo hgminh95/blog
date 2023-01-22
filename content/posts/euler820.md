@@ -21,9 +21,12 @@ This is part 1 of a 2-part series.
 At the heart of the problem is how to calculate $n^{th}$ digit of $\frac{1}{x}$. To do so, we multiply $\frac{1}{x}$ with $10^n$, and get the last digit of the integral part.
 
 $$ digit = \left\lfloor \frac{10^n}{x} \right\rfloor \\; mod \\; 10 $$
-$$ = \left\lfloor \frac{(10^{n-1} \\; mod \\; x) * 10}{x} \right\rfloor $$
 
-<p style="text-align:right; font-style: italic"><a href="https://stackoverflow.com/questions/804934/getting-a-specific-digit-from-a-ratio-expansion-in-any-base-nth-digit-of-x-y" target="_blank">intuitively</a> - if you do division like <a href="https://baiontap.com/wp-content/uploads/2020/09/2-1.png" target="_blank">this</a>, the formula above probably come more naturally</p>
+[Intuitively,](https://stackoverflow.com/questions/804934/getting-a-specific-digit-from-a-ratio-expansion-in-any-base-nth-digit-of-x-y)
+
+$$ digit = \left\lfloor \frac{(10^{n-1} \\; mod \\; x) * 10}{x} \right\rfloor $$
+
+<p style="text-align:right; font-style: italic">(if you do division like <a href="https://baiontap.com/wp-content/uploads/2020/09/2-1.png" target="_blank">this</a>, the formula above probably comes more naturally)</p>
 
 To calculate $10^{n - 1} \\; mod \\; x$ quickly, we can use [binary exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation#Left-to-right_binary_method). The time complexity would be $O(n log_n)$. With the problem asking for result of $n = 10^7$, this algorithm should be able to produce an answer within a blink.
 

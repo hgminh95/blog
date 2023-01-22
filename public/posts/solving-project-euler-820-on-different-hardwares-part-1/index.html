@@ -145,9 +145,10 @@ This is part 1 of a 2-part series.">
 <p>All the source code is available at <a href="https://github.com/hgminh95/euler820" target="_blank" rel="noopener">Github</a>.</p>
 <p>This is part 1 of a 2-part series.</p>
 <h2 id="the-solution">The Solution <a href="#the-solution" class="anchor">🔗</a></h2><p>At the heart of the problem is how to calculate $n^{th}$ digit of $\frac{1}{x}$. To do so, we multiply $\frac{1}{x}$ with $10^n$, and get the last digit of the integral part.</p>
-<p>$$ digit = \left\lfloor \frac{10^n}{x} \right\rfloor \; mod \; 10 $$
-$$ = \left\lfloor \frac{(10^{n-1} \; mod \; x) * 10}{x} \right\rfloor $$</p>
-<p style="text-align:right; font-style: italic"><a href="https://stackoverflow.com/questions/804934/getting-a-specific-digit-from-a-ratio-expansion-in-any-base-nth-digit-of-x-y" target="_blank">intuitively</a> - if you do division like <a href="https://baiontap.com/wp-content/uploads/2020/09/2-1.png" target="_blank">this</a>, the formula above probably come more naturally</p>
+<p>$$ digit = \left\lfloor \frac{10^n}{x} \right\rfloor \; mod \; 10 $$</p>
+<p><a href="https://stackoverflow.com/questions/804934/getting-a-specific-digit-from-a-ratio-expansion-in-any-base-nth-digit-of-x-y" target="_blank" rel="noopener">Intuitively,</a></p>
+<p>$$ digit = \left\lfloor \frac{(10^{n-1} \; mod \; x) * 10}{x} \right\rfloor $$</p>
+<p style="text-align:right; font-style: italic">(if you do division like <a href="https://baiontap.com/wp-content/uploads/2020/09/2-1.png" target="_blank">this</a>, the formula above probably comes more naturally)</p>
 <p>To calculate $10^{n - 1} \; mod \; x$ quickly, we can use <a href="https://en.wikipedia.org/wiki/Modular_exponentiation#Left-to-right_binary_method" target="_blank" rel="noopener">binary exponentiation</a>. The time complexity would be $O(n log_n)$. With the problem asking for result of $n = 10^7$, this algorithm should be able to produce an answer within a blink.</p>
 <h2 id="cpu">CPU <a href="#cpu" class="anchor">🔗</a></h2><h3 id="recursive">Recursive <a href="#recursive" class="anchor">🔗</a></h3><p>The most obvious implementation would be to calculate the exponential modulo recursively. At each step, you reduce <code>power</code> by half, until it reaches 0.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">ExpModuloRecursive</span>(<span style="color:#66d9ef">int32_t</span> power, <span style="color:#66d9ef">int32_t</span> modulo) {

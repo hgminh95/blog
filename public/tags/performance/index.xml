@@ -6,7 +6,19 @@
     <description>Recent content in performance on hgminh&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 23 Mar 2022 20:54:08 +0800</lastBuildDate><atom:link href="https://hgminh.dev/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 20 Jan 2023 20:38:02 +0800</lastBuildDate><atom:link href="https://hgminh.dev/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Solving Project Euler 820 on different hardwares (part 1)</title>
+      <link>https://hgminh.dev/posts/solving-project-euler-820-on-different-hardwares-part-1/</link>
+      <pubDate>Fri, 20 Jan 2023 20:38:02 +0800</pubDate>
+      
+      <guid>https://hgminh.dev/posts/solving-project-euler-820-on-different-hardwares-part-1/</guid>
+      <description>&lt;p&gt;For those of you who don&amp;rsquo;t know, &lt;a href=&#34;https://projecteuler.net/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Project Euler&lt;/a&gt; is a series of challenging mathematical/computer programming problems. Though the problem is more on figuring out the mathematical insight, this post will focus on the engineering side. We are going to look at problem &lt;a href=&#34;https://projecteuler.net/problem=820&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;#820&lt;/a&gt;, and try to solve it on various kinds of hardwares, ranging from CPU to FPGA, to see how much speed gains we can get from engineering alone.&lt;/p&gt;
+&lt;p&gt;Also, it is fun to see how different hardware affects on performance of the same codebase.&lt;/p&gt;
+&lt;p&gt;All the source code is available at &lt;a href=&#34;https://github.com/hgminh95/euler820&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This is part 1 of a 2-part series.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Which Loop Is Faster?</title>
       <link>https://hgminh.dev/posts/which-loop-is-faster/</link>

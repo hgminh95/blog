@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Solving Project Euler 820 on different hardwares (part 1) | hgminh&#39;s blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="For those of you who don&rsquo;t know, Project Euler is a series of challenging mathematical/computer programming problems. Though the problem is more on figuring out the mathematical insight, this post will focus on the engineering side. We are going to look at problem #820, and try to solve it on various kinds of hardwares, ranging from CPU to FPGA, to see how much speed gains we can get from engineering alone.
+Also, it is fun to see how different hardware affects on performance of the same codebase.
+All the source code is available at Github.
+This is part 1 of a 2-part series.">
+<meta name="og:description" content="For those of you who don&rsquo;t know, Project Euler is a series of challenging mathematical/computer programming problems. Though the problem is more on figuring out the mathematical insight, this post will focus on the engineering side. We are going to look at problem #820, and try to solve it on various kinds of hardwares, ranging from CPU to FPGA, to see how much speed gains we can get from engineering alone.
+Also, it is fun to see how different hardware affects on performance of the same codebase.
+All the source code is available at Github.
+This is part 1 of a 2-part series.">
+
+<meta name="og:image" content="/images/euler820.png">
+
+<meta name="generator" content="Hugo 0.109.0">
+
+
+  <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+	<a href="/about">About</a>
+
+	
+		<a href="https://github.com/hgminh95/blog">Github</a>
+	
+
+	
+	  <a class="button" href="https://hgminh.dev/index.xml">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">Solving Project Euler 820 on different hardwares (part 1)</h1>
+
+    <div class="tip">
+        <time datetime="2023-01-20 20:38:02 &#43;0800 &#43;08">Jan 20, 2023</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          1609 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          8 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+    <aside class="toc">
+      <details open>
+          <summary>Table of Contents
+          </summary>
+          <div>
+              <nav id="TableOfContents">
+  <ul>
+    <li><a href="#the-solution">The Solution</a></li>
+    <li><a href="#cpu">CPU</a>
+      <ul>
+        <li><a href="#recursive">Recursive</a></li>
+        <li><a href="#looping-through-the-bit">Looping through the bit</a></li>
+        <li><a href="#faster-modulo">Faster Modulo</a></li>
+        <li><a href="#loop-unroll">Loop Unroll</a></li>
+        <li><a href="#multi-thread">Multi-Thread</a></li>
+      </ul>
+    </li>
+    <li><a href="#results-and-explanation">Results and Explanation</a></li>
+    <li><a href="#future-works">Future Works</a></li>
+  </ul>
+</nav>
+          </div>
+      </details>
+    </aside>
+  
+
+
+    
+
+
+    <div class="content">
+      <p>For those of you who don&rsquo;t know, <a href="https://projecteuler.net/" target="_blank" rel="noopener">Project Euler</a> is a series of challenging mathematical/computer programming problems. Though the problem is more on figuring out the mathematical insight, this post will focus on the engineering side. We are going to look at problem <a href="https://projecteuler.net/problem=820" target="_blank" rel="noopener">#820</a>, and try to solve it on various kinds of hardwares, ranging from CPU to FPGA, to see how much speed gains we can get from engineering alone.</p>
+<p>Also, it is fun to see how different hardware affects on performance of the same codebase.</p>
+<p>All the source code is available at <a href="https://github.com/hgminh95/euler820" target="_blank" rel="noopener">Github</a>.</p>
+<p>This is part 1 of a 2-part series.</p>
+<h2 id="the-solution">The Solution <a href="#the-solution" class="anchor">🔗</a></h2><p>At the heart of the problem is how to calculate $n^{th}$ digit of $\frac{1}{x}$. To do so, we multiply $\frac{1}{x}$ with $10^n$, and get the last digit of the integral part.</p>
+<p>$$ digit = \left\lfloor \frac{10^n}{x} \right\rfloor \; mod \; 10 $$
+$$ = \left\lfloor \frac{(10^{n-1} \; mod \; x) * 10}{x} \right\rfloor $$</p>
+<p style="text-align:right; font-style: italic"><a href="https://stackoverflow.com/questions/804934/getting-a-specific-digit-from-a-ratio-expansion-in-any-base-nth-digit-of-x-y" target="_blank">intuitively</a> - if you do division like <a href="https://baiontap.com/wp-content/uploads/2020/09/2-1.png" target="_blank">this</a>, the formula above probably come more naturally</p>
+<p>To calculate $10^{n - 1} \; mod \; x$ quickly, we can use <a href="https://en.wikipedia.org/wiki/Modular_exponentiation#Left-to-right_binary_method" target="_blank" rel="noopener">binary exponentiation</a>. The time complexity would be $O(n log_n)$. With the problem asking for result of $n = 10^7$, this algorithm should be able to produce an answer within a blink.</p>
+<h2 id="cpu">CPU <a href="#cpu" class="anchor">🔗</a></h2><h3 id="recursive">Recursive <a href="#recursive" class="anchor">🔗</a></h3><p>The most obvious implementation would be to calculate the exponential modulo recursively. At each step, you reduce <code>power</code> by half, until it reaches 0.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">ExpModuloRecursive</span>(<span style="color:#66d9ef">int32_t</span> power, <span style="color:#66d9ef">int32_t</span> modulo) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (power <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">auto</span> res <span style="color:#f92672">=</span> ExpModuloRecursive(power <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>, modulo);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (power <span style="color:#f92672">%</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (<span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int64_t</span><span style="color:#f92672">&gt;</span>(res) <span style="color:#f92672">*</span> res) <span style="color:#f92672">%</span> modulo;
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> ((<span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int64_t</span><span style="color:#f92672">&gt;</span>(res) <span style="color:#f92672">*</span> res) <span style="color:#f92672">%</span> modulo <span style="color:#f92672">*</span> <span style="color:#ae81ff">10</span>) <span style="color:#f92672">%</span> modulo;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="looping-through-the-bit">Looping through the bit <a href="#looping-through-the-bit" class="anchor">🔗</a></h3><p>Another way is to decompose <code>N</code> into</p>
+<p>$$10'000'000 = 2^7 + 2^9 + 2^{10} + 2^{12} + 2^{15} + 2^{19} + 2^{20} + 2^{23}$$</p>
+<p>To calculate $10^{2^x}$, we just need to repeatedly square itself by $x$ times. Multiply all of them together and you get the result.</p>
+<p>The nice aspect about this is that you don&rsquo;t need recursion, which is usually costly, especially for non-<a href="https://en.wikipedia.org/wiki/Tail_call" target="_blank" rel="noopener">tail recursion</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">GetKBitOfN</span>(<span style="color:#66d9ef">int32_t</span> n, <span style="color:#66d9ef">int</span> k) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> (n <span style="color:#f92672">&gt;&gt;</span> k) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Get index of highest set bit in a 32-bit integer.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// In 1-index.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">GetHighestSetBit</span>(<span style="color:#66d9ef">int32_t</span> n) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">int32_t</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span> <span style="color:#f92672">-</span> __builtin_clz(n);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">ExpModuloBit</span>(<span style="color:#66d9ef">int32_t</span> power, <span style="color:#66d9ef">int32_t</span> modulo) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int64_t</span> res <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int64_t</span> curr_power <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> GetHighestSetBit(power); <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (GetKBitOfN(power, i)) {
+</span></span><span style="display:flex;"><span>      res <span style="color:#f92672">=</span> (res <span style="color:#f92672">*</span> curr_power) <span style="color:#f92672">%</span> modulo;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    curr_power <span style="color:#f92672">=</span> (curr_power <span style="color:#f92672">*</span> curr_power) <span style="color:#f92672">%</span> modulo;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> res;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="faster-modulo">Faster Modulo <a href="#faster-modulo" class="anchor">🔗</a></h3><p>Another thing to look for is modulo operation. Modulo and integer division are among the slowest arithmetic operations (even slower than floating point operation). You could probably execute a hundred integer addition/subtraction before finishing a <a href="https://www.agner.org/optimize/instruction_tables.pdf" target="_blank" rel="noopener">single integer division</a>.</p>
+<p>There are various methods to speed up modulo reductions: <a href="https://en.wikipedia.org/wiki/Barrett_reduction" target="_blank" rel="noopener">Barrett Reduction</a>, <a href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication" target="_blank" rel="noopener">Montgomery</a>, etc. In fact, your compiler uses a lot of tricks to not have to divide integers; e.g. converting division by power of 2 to left shift, convert division by constant to multiplication and left shift, etc.</p>
+<p><a href="https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/" target="_blank" rel="noopener">This blog post</a> provides a pretty good summary.</p>
+<p>Below is an example of the code snippet using <a href="https://github.com/lemire/fastmod" target="_blank" rel="noopener"><code>fastmod</code></a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">ExpModuloBitWithFastMod</span>(<span style="color:#66d9ef">int32_t</span> power, <span style="color:#66d9ef">int32_t</span> modulo) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int64_t</span> res <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int64_t</span> curr_power <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">auto</span> M <span style="color:#f92672">=</span> fastmod<span style="color:#f92672">::</span>computeM_u64(modulo);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> GetHighestSetBit(power); <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (GetKBitOfN(power, i)) {
+</span></span><span style="display:flex;"><span>      res <span style="color:#f92672">=</span> fastmod<span style="color:#f92672">::</span>fastmod_u64(res <span style="color:#f92672">*</span> curr_power, M, modulo);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    curr_power <span style="color:#f92672">=</span> fastmod<span style="color:#f92672">::</span>fastmod_u64(curr_power <span style="color:#f92672">*</span> curr_power, M, modulo);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> res;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In the GitHub repos, I tested it with <code>fastmod</code> and <a href="https://libdivide.com/" target="_blank" rel="noopener"><code>libdivide</code></a>.</p>
+<h3 id="loop-unroll">Loop Unroll <a href="#loop-unroll" class="anchor">🔗</a></h3><p>This is a pretty common <a href="https://en.wikipedia.org/wiki/Loop_unrolling" target="_blank" rel="noopener">technique</a> to optimize stuff. The idea is to run multiple iterations at 1 go, to avoid the cost of checking the loop conditions, and also allow more instructions to be <a href="https://en.wikipedia.org/wiki/Instruction_pipelining" target="_blank" rel="noopener">pipelined</a>.</p>
+<p>Since <code>GetNthDigitFromFracX</code> is quite a complex function, compilers won&rsquo;t be able to unroll it. We will have to help ourselves in this case,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// Assume N % 4 == 0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N <span style="color:#f92672">/</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>  std<span style="color:#f92672">::</span>array<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int64_t</span>, <span style="color:#ae81ff">4</span><span style="color:#f92672">&gt;</span> digits{<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>};
+</span></span><span style="display:flex;"><span>  std<span style="color:#f92672">::</span>array<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int64_t</span>, <span style="color:#ae81ff">4</span><span style="color:#f92672">&gt;</span> curr_power{<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">10</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> GetHighestSetBit(N <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>); <span style="color:#f92672">++</span>k) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (GetKBitOfN(N <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>, k)) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>        digits[j] <span style="color:#f92672">=</span> (digits[j] <span style="color:#f92672">*</span> curr_power[j]) <span style="color:#f92672">%</span> (<span style="color:#ae81ff">4</span> <span style="color:#f92672">*</span> i <span style="color:#f92672">+</span> j <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>      curr_power[j] <span style="color:#f92672">=</span> (curr_power[j] <span style="color:#f92672">*</span> curr_power[j]) <span style="color:#f92672">%</span> (<span style="color:#ae81ff">4</span> <span style="color:#f92672">*</span> i <span style="color:#f92672">+</span> j <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>    digits[j] <span style="color:#f92672">*=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>    digits[j] <span style="color:#f92672">/=</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">*</span> i <span style="color:#f92672">+</span> j <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">+=</span> digits[j];
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="multi-thread">Multi-Thread <a href="#multi-thread" class="anchor">🔗</a></h3><p>Since each digit can be computed independently, multi-thread is an obvious choice. We can just split up the work between different threads, and then add them up together at the end.</p>
+<p>There will be a bit of overhead to managing these threads, and there could be lower performance if they have to compete for the same cores; but overall, this should be pretty straightforward speed up.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> NUM_THREADS; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>  threads.push_back(std<span style="color:#f92672">::</span><span style="color:#66d9ef">thread</span>([<span style="color:#f92672">&amp;</span>sum, i]() {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Run from i * N / NUM_THREADS + 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#66d9ef">auto</span> start <span style="color:#f92672">=</span> i <span style="color:#f92672">*</span> N <span style="color:#f92672">/</span> NUM_THREADS <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">auto</span> end <span style="color:#f92672">=</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">/</span> NUM_THREADS;
+</span></span><span style="display:flex;"><span>      sum.fetch_add(CalculatePartialS(
+</span></span><span style="display:flex;"><span>          N, start, end,
+</span></span><span style="display:flex;"><span>          [](<span style="color:#66d9ef">int32_t</span> n, <span style="color:#66d9ef">int32_t</span> x) { <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ExpModuloBit</span>(n, x); }
+</span></span><span style="display:flex;"><span>      ));
+</span></span><span style="display:flex;"><span>  }));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>You can also combine with above optimization to yield even better result.</p>
+<h2 id="results-and-explanation">Results and Explanation <a href="#results-and-explanation" class="anchor">🔗</a></h2><p>The code is compiled under GCC 10 and Clang 15 under 3 CPUs:</p>
+<ul>
+<li>Apple M2 - with Clang</li>
+<li>AMD Ryzen 9 (Zen) - with GCC</li>
+<li>Intel Xeon Gold (Cascade Lake) - with GCC</li>
+<li>Intel Core i9 10th gen (Comet Lake) - with GCC</li>
+</ul>
+<p>Each cell has 2 numbers, the first one for $N = 10^7$ and another for $N = 10^8$. All numbers are in seconds. They are measured with <code>time</code> command, and the runtime environment is not very well-controlled, so don&rsquo;t expect very accurate results.</p>
+<p>Also, don&rsquo;t look too much into absolute latency between different CPUs, as I don&rsquo;t really choose the same equivalent CPUs. I found numbers of different variants in the same CPU tell us more interesting things in this case.</p>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th style="text-align:center">M2</th>
+<th style="text-align:center">Zen</th>
+<th style="text-align:center">Cascade Lake</th>
+<th style="text-align:center">Comet Lake</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recursive</td>
+<td style="text-align:center">1.29 / 11.16</td>
+<td style="text-align:center">1.29 / 15.9</td>
+<td style="text-align:center">3.10 / 35.62</td>
+<td style="text-align:center">2.27 / 26.10</td>
+</tr>
+<tr>
+<td>Loop</td>
+<td style="text-align:center">1.23 / 10.04</td>
+<td style="text-align:center">1.94 / 24.17</td>
+<td style="text-align:center">3.49 / 40.47</td>
+<td style="text-align:center">2.57 / 29.88</td>
+</tr>
+<tr>
+<td>With fastmod</td>
+<td style="text-align:center">1.54 / 13.21</td>
+<td style="text-align:center">1.29 / 15.12</td>
+<td style="text-align:center">1.76 / 20.03</td>
+<td style="text-align:center">1.29 / 14.90</td>
+</tr>
+<tr>
+<td>With libdivide</td>
+<td style="text-align:center">1.44 / 12.41</td>
+<td style="text-align:center">0.82 / 9.3</td>
+<td style="text-align:center">1.29 / 14.42</td>
+<td style="text-align:center">0.96 / 10.72</td>
+</tr>
+<tr>
+<td>Loop Unroll</td>
+<td style="text-align:center">0.70 / 4.21</td>
+<td style="text-align:center">1.83 / 23.79</td>
+<td style="text-align:center">2.82 / 34.02</td>
+<td style="text-align:center">2.12 / 25.51</td>
+</tr>
+<tr>
+<td>Multi-Thread</td>
+<td style="text-align:center">0.53 / 2.54</td>
+<td style="text-align:center">0.65 / 7.63</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">-</td>
+</tr>
+</tbody>
+</table>
+<p>(I forgot to record the time of some Multi-Thread programs, but they are pretty predictable so we can safely ignore it)</p>
+<p>M2 seems to be fastest here. But please note that this workload is not a common one, since there is pretty much no memory access. So don&rsquo;t generalize this result.</p>
+<p>GCC partially unrolls and inlines the recursive functions (last 8 steps are unrolled in my test), while Clang keeps the recursive structure. However, when we loop through each bit, GCC fails to do this optimization, leading to faster code in <code>recursive</code> compared to <code>loop</code>. This is possible because in my code, <code>N</code> is a compiled-time constant so GCC knows exactly how the recursion is gonna be.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>  <span style="color:#75715e"># Asm generated by GCC for the recursive case.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">400987:</span>       <span style="color:#a6e22e">e8</span> <span style="color:#ae81ff">34</span> <span style="color:#ae81ff">02</span> <span style="color:#ae81ff">00</span> <span style="color:#ae81ff">00</span>          <span style="color:#66d9ef">call</span>   <span style="color:#ae81ff">400bc0</span> &lt;<span style="color:#66d9ef">_Z18ExpModuloRecursiveii.part.0</span>&gt;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">return</span> (<span style="color:#66d9ef">static_cast</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">int64_t</span><span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">res</span>) * <span style="color:#66d9ef">res</span>) <span style="color:#960050;background-color:#1e0010">%</span> <span style="color:#66d9ef">modulo</span><span style="color:#75715e">;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#960050;background-color:#1e0010">40098</span>c:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">98</span>                   <span style="color:#a6e22e">cdqe</span>   
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">40098</span><span style="color:#66d9ef">e</span>:       <span style="color:#ae81ff">48</span> <span style="color:#ae81ff">0</span><span style="color:#66d9ef">f</span> <span style="color:#66d9ef">af</span> <span style="color:#66d9ef">c0</span>             <span style="color:#66d9ef">imul</span>   <span style="color:#66d9ef">rax</span>,<span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">400992:</span>       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">99</span>                   <span style="color:#a6e22e">cqo</span>    
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">400994</span>:       <span style="color:#ae81ff">48</span> <span style="color:#66d9ef">f7</span> <span style="color:#66d9ef">f9</span>                <span style="color:#66d9ef">idiv</span>   <span style="color:#66d9ef">rcx</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">return</span> (<span style="color:#66d9ef">static_cast</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">int64_t</span><span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">res</span>) * <span style="color:#66d9ef">res</span> * <span style="color:#ae81ff">10</span>) <span style="color:#960050;background-color:#1e0010">%</span> <span style="color:#66d9ef">modulo</span><span style="color:#75715e">;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#960050;background-color:#1e0010">400997:</span>       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">f</span> <span style="color:#66d9ef">af</span> <span style="color:#66d9ef">d2</span>             <span style="color:#66d9ef">imul</span>   <span style="color:#66d9ef">rdx</span>,<span style="color:#66d9ef">rdx</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">40099</span>b:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">8</span><span style="color:#a6e22e">d</span> <span style="color:#ae81ff">04</span> <span style="color:#ae81ff">92</span>             <span style="color:#66d9ef">lea</span>    <span style="color:#66d9ef">rax</span>,[<span style="color:#66d9ef">rdx</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#66d9ef">rdx</span>*<span style="color:#ae81ff">4</span>]
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">40099</span>f:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">01</span> <span style="color:#a6e22e">c0</span>                <span style="color:#66d9ef">add</span>    <span style="color:#66d9ef">rax</span>,<span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>a2:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">99</span>                   <span style="color:#a6e22e">cqo</span>    
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">4009</span><span style="color:#66d9ef">a4</span>:       <span style="color:#ae81ff">48</span> <span style="color:#66d9ef">f7</span> <span style="color:#66d9ef">f9</span>                <span style="color:#66d9ef">idiv</span>   <span style="color:#66d9ef">rcx</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>a7:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">f</span> <span style="color:#66d9ef">af</span> <span style="color:#66d9ef">d2</span>             <span style="color:#66d9ef">imul</span>   <span style="color:#66d9ef">rdx</span>,<span style="color:#66d9ef">rdx</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>ab:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">8</span><span style="color:#a6e22e">d</span> <span style="color:#ae81ff">04</span> <span style="color:#ae81ff">92</span>             <span style="color:#66d9ef">lea</span>    <span style="color:#66d9ef">rax</span>,[<span style="color:#66d9ef">rdx</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#66d9ef">rdx</span>*<span style="color:#ae81ff">4</span>]
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>af:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">01</span> <span style="color:#a6e22e">c0</span>                <span style="color:#66d9ef">add</span>    <span style="color:#66d9ef">rax</span>,<span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>b2:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">99</span>                   <span style="color:#a6e22e">cqo</span>    
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">4009</span><span style="color:#66d9ef">b4</span>:       <span style="color:#ae81ff">48</span> <span style="color:#66d9ef">f7</span> <span style="color:#66d9ef">f9</span>                <span style="color:#66d9ef">idiv</span>   <span style="color:#66d9ef">rcx</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>b7:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">0</span><span style="color:#a6e22e">f</span> <span style="color:#66d9ef">af</span> <span style="color:#66d9ef">d2</span>             <span style="color:#66d9ef">imul</span>   <span style="color:#66d9ef">rdx</span>,<span style="color:#66d9ef">rdx</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>bb:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">8</span><span style="color:#a6e22e">d</span> <span style="color:#ae81ff">04</span> <span style="color:#ae81ff">92</span>             <span style="color:#66d9ef">lea</span>    <span style="color:#66d9ef">rax</span>,[<span style="color:#66d9ef">rdx</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#66d9ef">rdx</span>*<span style="color:#ae81ff">4</span>]
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">4009</span>bf:       <span style="color:#960050;background-color:#1e0010">48</span> <span style="color:#960050;background-color:#1e0010">01</span> <span style="color:#a6e22e">c0</span>                <span style="color:#66d9ef">add</span>    <span style="color:#66d9ef">rax</span>,<span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">...</span>
+</span></span></code></pre></div><p>The latency differences between ways of doing modulo mostly due to different latency/throughput of arithmetic operations on each hardware.</p>
+<p><code>fastmod</code> is slower than <code>libdivide</code> here, but note that this is 64-bit modulo; it could be faster on 32-bit.</p>
+<p><code>fastmod</code>/<code>libdivide</code> is slower in M2, suggesting faster integer division in Apple hardware. <a href="https://ridiculousfish.com/blog/posts/benchmarking-libdivide-m1-avx512.html" target="_blank" rel="noopener">This benchmark</a> also shows similar results. This is actually pretty impressive. It is unclear on how Apple does it, but likely because there are multiple units for integer division.</p>
+<p>The loop unroll version is much faster in M2 compared to other architectures. This should be due to inability to pipeline integer division efficiently in x86. A bit tricky to be 100% sure though as I don&rsquo;t know any tooling or document to give more insight on performance implication of M2.</p>
+<p>As mentioned above, you can combine them to get faster result, depending on the arch. For example, in M2, you can run <a href="https://github.com/hgminh95/euler820/blob/main/multi_thread_with_unroll.cpp" target="_blank" rel="noopener">multiple threads with loop unroll</a>. The test on my machine show that it can run with $N = 10^8$ in ~ 0.8 seconds, more than 10 times faster than the original solution.</p>
+<h2 id="future-works">Future Works <a href="#future-works" class="anchor">🔗</a></h2><p>SIMD, GPU and FPGA coming soon&hellip;</p>
+    </div>
+
+    
+        <div class="tags">
+            
+                <a href="https://hgminh.dev/tags/performance">performance</a>
+            
+        </div>
+    
+    
+    
+<div id="hyvor-talk-view"></div>
+<script type="text/javascript">
+    var HYVOR_TALK_WEBSITE = 6758;
+    var HYVOR_TALK_CONFIG = {
+        url: false,
+        id: false
+    };
+</script>
+<script async type="text/javascript" src="//talk.hyvor.com/web-api/embed.js"></script>
+
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+
+    
+</footer>
+
+
+
+
+
+
+  </body>
+</html>

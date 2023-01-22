@@ -9,7 +9,7 @@
 <meta name="description" content="My Blog">
 <meta name="og:description" content="My Blog">
 
-<meta name="generator" content="Hugo 0.96.0" />
+<meta name="generator" content="Hugo 0.109.0">
 
 
   <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
@@ -22,11 +22,33 @@
 <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
 
 
-  
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css" integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn" crossorigin="anonymous">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js" integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous"
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
     onload="renderMathInElement(document.body);"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
 
 
 
@@ -76,36 +98,82 @@
         
         <section class="item">
           <div>
-            <h1 class="title"><a href='/posts/assembly-for-c-developers/'>Assembly for C&#43;&#43; developers</a></h1>
+            <h1 class="title"><a href='/posts/solving-project-euler-820-on-different-hardwares-part-1/'>Solving Project Euler 820 on different hardwares (part 1)</a></h1>
             <div class ="date">
-                <time datetime="2022-09-17 00:38:02 &#43;0800 &#43;08">Sep 17, 2022</time>  
+                <time datetime="2023-01-20 20:38:02 &#43;0800 &#43;08">Jan 20, 2023</time>  
             </div>
           </div>
 
+          <p style="margin-top: 0.5rem; margin-bottom: 1rem;">1609 words - 8 minute read</p>
+
+	        
+	        <img src="/images/euler820.png" style="width: 100%; height: 200px; object-fit: cover; margin-bottom: 1rem;">
+	        
+
           
-              <div class="summary">A quick post on how to read assembly quickly as C&#43;&#43; developer. Note that this is NOT a guide on how to read assembly code. Rather, this post shows how common C&#43;&#43; constructs/routines are compiled into assembly. From there, it can help you to read asm faster.
-</div>
+              <div class="summary" style="margin-top: 1rem;"><p>For those of you who don&rsquo;t know, <a href="https://projecteuler.net/" target="_blank" rel="noopener">Project Euler</a> is a series of challenging mathematical/computer programming problems. Though the problem is more on figuring out the mathematical insight, this post will focus on the engineering side. We are going to look at problem <a href="https://projecteuler.net/problem=820" target="_blank" rel="noopener">#820</a>, and try to solve it on various kinds of hardwares, ranging from CPU to FPGA, to see how much speed gains we can get from engineering alone.</p>
+<p>Also, it is fun to see how different hardware affects on performance of the same codebase.</p>
+<p>All the source code is available at <a href="https://github.com/hgminh95/euler820" target="_blank" rel="noopener">Github</a>.</p>
+<p>This is part 1 of a 2-part series.</p></div>
           
 
           
+              <div class="tags">
+                  
+                      <a href="https://hgminh.dev/tags/performance">performance</a>
+                  
+              </div>
+          
+
+          <p><a href="/posts/solving-project-euler-820-on-different-hardwares-part-1/"><b>Read More...</b></a></p>
         </section>
     
         
         
         <section class="item">
           <div>
-            <h1 class="title"><a href='/posts/bookmark-wip/'>Bookmark (WIP)</a></h1>
+            <h1 class="title"><a href='/posts/assembly-for-c-developers/'>Assembly for C&#43;&#43; developers</a></h1>
+            <div class ="date">
+                <time datetime="2022-09-17 00:38:02 &#43;0800 &#43;08">Sep 17, 2022</time>  
+            </div>
+          </div>
+
+          <p style="margin-top: 0.5rem; margin-bottom: 1rem;">1403 words - 7 minute read</p>
+
+	        
+	        <img src="/images/assembly-for-c-developers.png" style="width: 100%; height: 200px; object-fit: cover; margin-bottom: 1rem;">
+	        
+
+          
+              <div class="summary" style="margin-top: 1rem;"><p>A quick post on how to read assembly quickly as C++ developer. Note that this is NOT a guide on how to read assembly code. Rather, this post shows how common C++ constructs/routines are compiled into assembly. From there, it can help you to read asm faster.</p></div>
+          
+
+          
+
+          <p><a href="/posts/assembly-for-c-developers/"><b>Read More...</b></a></p>
+        </section>
+    
+        
+        
+        <section class="item">
+          <div>
+            <h1 class="title"><a href='/posts/bookmarks-wip/'>Bookmarks (WIP)</a></h1>
             <div class ="date">
                 <time datetime="2022-09-03 00:38:02 &#43;0800 &#43;08">Sep 3, 2022</time>  
             </div>
           </div>
 
+          <p style="margin-top: 0.5rem; margin-bottom: 1rem;">202 words - 1 minute read</p>
+
+	        
+
           
-              <div class="summary">List of data structures, algorithm, design for common problems
-</div>
+              <div class="summary" style="margin-top: 1rem;"><p>List of data structures, algorithm, design for common problems</p></div>
           
 
           
+
+          <p><a href="/posts/bookmarks-wip/"><b>Read More...</b></a></p>
         </section>
     
         
@@ -118,9 +186,14 @@
             </div>
           </div>
 
+          <p style="margin-top: 0.5rem; margin-bottom: 1rem;">1373 words - 7 minute read</p>
+
+	        
+	        <img src="/images/which-loop-is-faster.png" style="width: 100%; height: 200px; object-fit: cover; margin-bottom: 1rem;">
+	        
+
           
-              <div class="summary">The first loop accesses the memory sequentially from the beginning to the end of the array. The second one skips N steps between 2 iterations. Which one is faster?
-</div>
+              <div class="summary" style="margin-top: 1rem;"><p>The first loop accesses the memory sequentially from the beginning to the end of the array. The second one skips N steps between 2 iterations. <strong>Which one is faster?</strong></p></div>
           
 
           
@@ -128,12 +201,10 @@
                   
                       <a href="https://hgminh.dev/tags/performance">performance</a>
                   
-                      <a href="https://hgminh.dev/tags/os">os</a>
-                  
-                      <a href="https://hgminh.dev/tags/memory">memory</a>
-                  
               </div>
           
+
+          <p><a href="/posts/which-loop-is-faster/"><b>Read More...</b></a></p>
         </section>
     
 
@@ -149,6 +220,9 @@
 
     
 </footer>
+
+
+
 
 
 

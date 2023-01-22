@@ -19,3 +19,6 @@
         <script src="{{ $.Site.BaseURL }}{{ . }}"></script>
     {{ end }}
 {{ end }}
+
+{{ if .Params.katex}}{{ partial "katex.html" . }}{{ end }}
+

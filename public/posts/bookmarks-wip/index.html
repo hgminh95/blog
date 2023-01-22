@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Bookmarks (WIP) | hgminh&#39;s blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="List of data structures, algorithm, design for common problems">
+<meta name="og:description" content="List of data structures, algorithm, design for common problems">
+
+<meta name="generator" content="Hugo 0.109.0">
+
+
+  <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+	<a href="/about">About</a>
+
+	
+		<a href="https://github.com/hgminh95/blog">Github</a>
+	
+
+	
+	  <a class="button" href="https://hgminh.dev/index.xml">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">Bookmarks (WIP)</h1>
+
+    <div class="tip">
+        <time datetime="2022-09-03 00:38:02 &#43;0800 &#43;08">Sep 3, 2022</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          202 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          1 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+    <aside class="toc">
+      <details open>
+          <summary>Table of Contents
+          </summary>
+          <div>
+              <nav id="TableOfContents">
+  <ul>
+    <li><a href="#hash-table">Hash Table</a></li>
+    <li><a href="#memory-allocator">Memory Allocator</a></li>
+    <li><a href="#timer">Timer</a></li>
+    <li><a href="#multi-thread">Multi-Thread</a></li>
+    <li><a href="#indexing">Indexing</a></li>
+    <li><a href="#large-data-system">Large Data System</a></li>
+    <li><a href="#data-aggregation">Data Aggregation</a></li>
+    <li><a href="#consensus">Consensus</a></li>
+    <li><a href="#small-tricks">Small Tricks</a></li>
+    <li><a href="#general-hardwares">General Hardwares</a></li>
+    <li><a href="#intel">Intel</a></li>
+  </ul>
+</nav>
+          </div>
+      </details>
+    </aside>
+  
+
+
+    
+
+
+    <div class="content">
+      <p>List of data structures, algorithm, design for common problems</p>
+<h2 id="hash-table">Hash Table <a href="#hash-table" class="anchor">🔗</a></h2><ul>
+<li>probablydance&rsquo;s series - <a href="https://probablydance.com/?s=hash" target="_blank" rel="noopener">https://probablydance.com/?s=hash</a></li>
+<li>Consistent Hashing - <a href="https://www.cs.princeton.edu/courses/archive/fall09/cos518/papers/chash.pdf" target="_blank" rel="noopener">https://www.cs.princeton.edu/courses/archive/fall09/cos518/papers/chash.pdf</a></li>
+<li>Google&rsquo;s Swiss Table - <a href="https://abseil.io/about/design/swisstables" target="_blank" rel="noopener">https://abseil.io/about/design/swisstables</a></li>
+</ul>
+<h2 id="memory-allocator">Memory Allocator <a href="#memory-allocator" class="anchor">🔗</a></h2><ul>
+<li>tcmalloc - <a href="https://github.com/google/tcmalloc/blob/master/docs/design.md" target="_blank" rel="noopener">https://github.com/google/tcmalloc/blob/master/docs/design.md</a></li>
+<li>jemalloc - <a href="https://github.com/jemalloc/jemalloc/wiki" target="_blank" rel="noopener">https://github.com/jemalloc/jemalloc/wiki</a></li>
+</ul>
+<h2 id="timer">Timer <a href="#timer" class="anchor">🔗</a></h2><ul>
+<li>Hashed and Hierarchical Timing Wheels: Data Structures for the Efficient Implementation of a Timer Facility - <a href="http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf" target="_blank" rel="noopener">http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf</a></li>
+</ul>
+<h2 id="multi-thread">Multi-Thread <a href="#multi-thread" class="anchor">🔗</a></h2><ul>
+<li>rigtorp ring buffer - <a href="https://rigtorp.se/ringbuffer/" target="_blank" rel="noopener">https://rigtorp.se/ringbuffer/</a></li>
+<li>1024cores MPMC queue - <a href="https://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue" target="_blank" rel="noopener">https://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue</a></li>
+</ul>
+<h2 id="indexing">Indexing <a href="#indexing" class="anchor">🔗</a></h2><ul>
+<li>The Ubiquitous B-Tree - <a href="http://carlosproal.com/ir/papers/p121-comer.pdf" target="_blank" rel="noopener">http://carlosproal.com/ir/papers/p121-comer.pdf</a></li>
+<li>Log Structured Merge Tree (LSM Tree) - <a href="https://www.google.com/search?q=log&#43;structured&#43;merge&#43;tree&amp;oq=log&#43;structured&#43;merge&#43;tree&amp;aqs=chrome..69i57j35i39l2j0i512l7.2934j0j7&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">https://www.google.com/search?q=log+structured+merge+tree&oq=log+structured+merge+tree&aqs=chrome..69i57j35i39l2j0i512l7.2934j0j7&sourceid=chrome&ie=UTF-8</a></li>
+</ul>
+<h2 id="large-data-system">Large Data System <a href="#large-data-system" class="anchor">🔗</a></h2><ul>
+<li>The Google File System - <a href="https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf" target="_blank" rel="noopener">https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf</a></li>
+<li>MapReduce: Simplified Data Processing on Large Clusters - <a href="https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf" target="_blank" rel="noopener">https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf</a></li>
+</ul>
+<h2 id="data-aggregation">Data Aggregation <a href="#data-aggregation" class="anchor">🔗</a></h2><ul>
+<li>Hyperloglog: The analysis of a near-optimal cardinality estimation algorithm - <a href="http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf" target="_blank" rel="noopener">http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf</a></li>
+<li>Bloom filter - <a href="https://en.wikipedia.org/wiki/Bloom_filter" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Bloom_filter</a></li>
+<li>HdrHistogram: A High Dynamic Range (HDR) Histogram - <a href="https://github.com/HdrHistogram/HdrHistogram" target="_blank" rel="noopener">https://github.com/HdrHistogram/HdrHistogram</a></li>
+<li>The PageRank Citation Ranking: Bringing Order to the Web - <a href="http://ilpubs.stanford.edu:8090/422/1/1999-66.pdf" target="_blank" rel="noopener">http://ilpubs.stanford.edu:8090/422/1/1999-66.pdf</a></li>
+</ul>
+<h2 id="consensus">Consensus <a href="#consensus" class="anchor">🔗</a></h2><ul>
+<li>Paxos - The Part Time Paliarment - <a href="http://lamport.azurewebsites.net/pubs/pubs.html#lamport-paxos" target="_blank" rel="noopener">http://lamport.azurewebsites.net/pubs/pubs.html#lamport-paxos</a></li>
+<li>Raft - <a href="https://raft.github.io/" target="_blank" rel="noopener">https://raft.github.io/</a></li>
+</ul>
+<h2 id="small-tricks">Small Tricks <a href="#small-tricks" class="anchor">🔗</a></h2><ul>
+<li>fastrange: A fast alternative to the modulo reduction - <a href="https://github.com/lemire/fastrange" target="_blank" rel="noopener">https://github.com/lemire/fastrange</a></li>
+<li>Small String Optimization - <a href="https://github.com/elliotgoodrich/SSO-23" target="_blank" rel="noopener">https://github.com/elliotgoodrich/SSO-23</a></li>
+</ul>
+<h2 id="general-hardwares">General Hardwares <a href="#general-hardwares" class="anchor">🔗</a></h2><ul>
+<li>Branch Prediction - <a href="https://danluu.com/branch-prediction/" target="_blank" rel="noopener">https://danluu.com/branch-prediction/</a></li>
+<li>An Overview of On-Chip Cache Coherence Protocol - <a href="https://www.researchgate.net/profile/Zainab-Alwaisi/publication/362068592_An_Overview_of_On-Chip_Cache_Coherence_Protocols/links/5ad71029a6fdcc2935835926/An-Overview-of-On-Chip-Cache-Coherence-Protocols.pdf" target="_blank" rel="noopener">https://www.researchgate.net/profile/Zainab-Alwaisi/publication/362068592_An_Overview_of_On-Chip_Cache_Coherence_Protocols/links/5ad71029a6fdcc2935835926/An-Overview-of-On-Chip-Cache-Coherence-Protocols.pdf</a></li>
+</ul>
+<h2 id="intel">Intel <a href="#intel" class="anchor">🔗</a></h2><ul>
+<li>How to Benchmark Code Execution Times on Intel® IA-32 and IA-64 Instruction Set Architectures - <a href="https://www.intel.de/content/dam/www/public/us/en/documents/white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf" target="_blank" rel="noopener">https://www.intel.de/content/dam/www/public/us/en/documents/white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf</a></li>
+</ul>
+    </div>
+
+    
+    
+    
+<div id="hyvor-talk-view"></div>
+<script type="text/javascript">
+    var HYVOR_TALK_WEBSITE = 6758;
+    var HYVOR_TALK_CONFIG = {
+        url: false,
+        id: false
+    };
+</script>
+<script async type="text/javascript" src="//talk.hyvor.com/web-api/embed.js"></script>
+
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+
+    
+</footer>
+
+
+
+
+
+
+  </body>
+</html>

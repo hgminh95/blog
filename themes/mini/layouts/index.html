@@ -15,8 +15,14 @@
             </div>
           </div>
 
+          <p style="margin-top: 0.5rem; margin-bottom: 1rem;">{{ i18n "wordCount" . }} - {{ i18n "minuteRead" . }}</p>
+
+	        {{ if isset .Params "thumbnail" }}
+	        <img src="/images/{{ .Params.thumbnail }}" style="width: 100%; height: 200px; object-fit: cover; margin-bottom: 1rem;">
+	        {{ end }}
+
           {{ if ne .Site.Params.hiddenPostSummaryInHomePage true }}
-              <div class="summary">{{ $summary | plainify | htmlUnescape }}</div>
+              <div class="summary" style="margin-top: 1rem;">{{ $summary }}</div>
           {{ end }}
 
           {{ with .Params.tags }}
@@ -26,6 +32,8 @@
                   {{ end }}
               </div>
           {{ end}}
+
+          <p><a href="{{ .RelPermalink }}"><b>Read More...</b></a></p>
         </section>
     {{ end }}
 

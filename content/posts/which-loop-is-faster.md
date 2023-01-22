@@ -1,7 +1,7 @@
 ---
 title: "Which Loop Is Faster?"
 date: 2022-03-23T20:54:08+08:00
-tags: ["performance", "os", "memory"]
+tags: ["performance"]
 thumbnail: which-loop-is-faster.png
 draft: false
 ---

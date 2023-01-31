@@ -10,6 +10,8 @@
     {{ end }}
 </footer>
 
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "e30af24cf01841aa9b69c777b7cf7096"}'></script><!-- End Cloudflare Web Analytics -->
+
 {{ range .Site.Params.customJS }}
     {{ if ( or ( hasPrefix . "http://" ) ( hasPrefix . "https://" ) ) }}
         <!-- remote js -->

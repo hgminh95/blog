@@ -25,6 +25,8 @@ params:
   copyright: ''
 
   links:
+    - name: Bookmarks
+      path: /bookmark
     - name: Github
       path: https://github.com/hgminh95/blog
 

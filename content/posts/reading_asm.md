@@ -119,15 +119,15 @@ return x == 0;</td>
 
   <tr class="mt-code">
     <td>struct A {
-    int *x;
-    A() {
-        x = new int[50];
-    }
+  int *x;
+  A() {
+    x = new int[50];
+  }
 };<br/>
 int foo() {
-    <a href="https://stackoverflow.com/questions/54281316/why-using-static-variables-inside-a-function-makes-it-runs-slower">// Static variable inside function</a>
-    static A a;
-    return a.x[0];
+  <a href="https://stackoverflow.com/questions/54281316/why-using-static-variables-inside-a-function-makes-it-runs-slower">// Static variable inside function</a>
+  static A a;
+  return a.x[0];
 }</td>
     <td>foo():
         movzx   eax, BYTE PTR guard variable for foo()::a[rip]
@@ -168,7 +168,8 @@ foo() [clone .cold]:
 
   <tr class="mt-code">
     <td><a href="https://stackoverflow.com/questions/72552/why-does-volatile-exist">// Volatile</a>
-void foo(volatile int &x, volatile int &y) {
+void foo(volatile int &x,
+         volatile int &y) {
     y = x;
     y = x;
 }<br/>
@@ -218,14 +219,14 @@ b = b + 10;</td>
     <td><span class="comment">// Change division by a variable
 // to division by constants</span>
 switch (b) {
-    case 2:
-        return a / 2;
-    case 3:
-        return a / 3;
-    [[likely]] case 7:
-        return a / 7;
-    default:
-        return a / b;
+  case 2:
+    return a / 2;
+  case 3:
+    return a / 3;
+  [[likely]] case 7:
+    return a / 7;
+  default:
+    return a / b;
 }</td>
     <td>        mov     esi, DWORD PTR [rsi]
         mov     ecx, DWORD PTR [rdi]
@@ -269,18 +270,18 @@ switch (b) {
 
   <tr class="mt-code">
     <td>switch (b) {
-    case 1:
-        return a + 1;
-    case 2:
-        return a / 2;
-    case 3:
-        return (a + 5) / 7;
-    case 4:
-        return (a + 9) / 10;
-    case 5:
-        return (a - 7) / 8;
-    default:
-        return a;
+  case 1:
+    return a + 1;
+  case 2:
+    return a / 2;
+  case 3:
+    return (a + 5) / 7;
+  case 4:
+    return (a + 9) / 10;
+  case 5:
+    return (a - 7) / 8;
+  default:
+    return a;
 }</td>
     <td>        cmp     esi, 5
         ja      .L9
@@ -337,7 +338,7 @@ switch (b) {
   <tr class="mt-code">
     <td><span class="comment">// Normal loop, without optimization</span>
 for (auto elem : arr) {
-    sum += elem;
+  sum += elem;
 }</td>
     <td>        mov     rax, QWORD PTR [rdi]
         mov     rcx, QWORD PTR [rdi+8]
@@ -359,7 +360,7 @@ for (auto elem : arr) {
 __attribute__((optimize("unroll-loops")))</br>
 ...
 for (auto elem : arr) {
-    sum += elem;
+  sum += elem;
 }</td>
     <td>        mov     rdx, QWORD PTR [rdi]
         mov     rsi, QWORD PTR [rdi+8]
@@ -431,7 +432,7 @@ for (auto elem : arr) {
   <tr class="mt-code">
     <td><a href="https://en.wikipedia.org/wiki/Automatic_vectorization">// With vectorize instructions</a>
 for (auto elem : arr) {
-    sum += elem;
+  sum += elem;
 }</td>
     <td>        mov     rdx, QWORD PTR [rdi]
         mov     rdi, QWORD PTR [rdi+8]
@@ -492,8 +493,7 @@ for (auto elem : arr) {
   </tr>
 
   <tr class="mt-code">
-    <td>
-KxVector<KxLogObserver*, unsigned int>::find(KxLogObserver* const&) const
+    <td>KxVector<KxLogObserver*, unsigned int>::find(KxLogObserver* const&) const
 std::allocator<wchar_t>::allocator()</td>
     <td>	<a href="https://en.wikipedia.org/wiki/Name_mangling">// Name Mangling</a>
 	_ZNK8KxVectorIP13KxLogObserverjE4findERKS1_
@@ -514,8 +514,8 @@ std::allocator<wchar_t>::allocator()</td>
   <tr class="mt-code">
     <td><span class="comment">// More complex function call</span>
 struct B {
-    int a;
-    int b;
+  int a;
+  int b;
 };<br/>
 int foo(int, B, std::string);<br/>
 ...
@@ -554,10 +554,10 @@ x = foo(3, B{.a=1, .b=2}, "abcdef");</td>
 
   <tr class="mt-code">
     <td>void foo(std::unique_ptr&lt;int&gt; &p) {
-    *p = 2;
+  *p = 2;
 }<br/>
 void bar(int *p) {
-    *p = 2;
+  *p = 2;
 }</td>
     <td><a href="https://stackoverflow.com/questions/58339165/why-can-a-t-be-passed-in-register-but-a-unique-ptrt-cannot">// ABI requirements on non-trivial types</a>
 foo(std::unique_ptr<int, std::default_delete<int> >&):
@@ -573,10 +573,10 @@ bar(int*):
   <tr class="mt-code">
     <td><a href="https://en.wikipedia.org/wiki/Virtual_method_table">// Virtual function call</a>
 struct Foo {
-    virtual int foo() = 0;
+  virtual int foo() = 0;
 };<br>
 int GetFoo(Foo *foo) {
-    return foo->foo() + 5;
+  return foo->foo() + 5;
 }</td>
     <td>        sub     rsp, 8
         mov     rax, QWORD PTR [rdi]
@@ -646,7 +646,8 @@ x.store(1);</td>
   <tr class="mt-code">
     <td>x = 1;
 <a href="https://en.wikipedia.org/wiki/Memory_barrier">// Memory barrier</a>
-std::atomic_thread_fence(std::memory_order_seq_cst);
+std::atomic_thread_fence(
+    std::memory_order_seq_cst);
 x = 3;</td>
     <td>	mov     DWORD PTR [rdi], 1
         lock or QWORD PTR [rsp], 0
@@ -659,12 +660,12 @@ x = 3;</td>
 
   <tr class="mt-code">
     <td>try {
-    if (x == 3)
-        throw std::runtime_error("Test");
-    else
-        return 4;
+  if (x == 3)
+    throw std::runtime_error("Test");
+  else
+    return 4;
 } catch (...) {
-    return 1;
+  return 1;
 }</td>
     <td>.LC0:
         .string "Test"
@@ -776,7 +777,7 @@ bar(int) [clone .cold]:
   <tr class="mt-code">
     <td>long long sum = 0;
 for (int i = 0; i < n; ++i) {
-    sum += i;
+  sum += i;
 }<br/>
 return sum;</td>
     <td>	<a href="http://kristerw.blogspot.com/2019/04/how-llvm-optimizes-geometric-sums.html">// No more loop :o</a>
@@ -797,7 +798,7 @@ return sum;</td>
 
   <tr class="mt-code">
     <td>int bar(int x) {
-    assert(x == 1);
+  assert(x == 1);
 }</td>
     <td>.LC1:
         .string "int bar(int)"
@@ -824,8 +825,8 @@ bar(int):
 
   <tr class="mt-code">
     <td>int foo(int a) {
-    while (a) {}
-    return 1;
+  while (a) {}
+  return 1;
 }</td>
     <td>foo(int):
         mov     eax, 1

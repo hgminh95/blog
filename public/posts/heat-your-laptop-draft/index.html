@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Heat Your Laptop (draft) | hgminh&#39;s blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperated situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.
+I also wrote a tool to heat up your laptop, you can find it here.">
+<meta name="og:description" content="Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperated situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.
+I also wrote a tool to heat up your laptop, you can find it here.">
+
+<meta name="og:image" content="/images/laptop-burning.png">
+
+<meta name="generator" content="Hugo 0.109.0">
+
+
+  <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+  
+
+	
+		<a href="/bookmark">Bookmarks</a>
+	
+		<a href="https://github.com/hgminh95/blog">Github</a>
+	
+
+	
+	  <a class="button" href="https://hgminh.dev/index.xml">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">Heat Your Laptop (draft)</h1>
+
+    <div class="tip">
+        <time datetime="2023-12-21 18:44:50 &#43;0800 &#43;08">Dec 21, 2023</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          891 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          5 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+    <aside class="toc">
+      <details open>
+          <summary>Table of Contents
+          </summary>
+          <div>
+              <nav id="TableOfContents">
+  <ul>
+    <li><a href="#where-does-the-heat-come-from">Where does the heat come from?</a></li>
+    <li><a href="#setup-the-test-environment">Setup the test environment</a></li>
+    <li><a href="#results">Results</a></li>
+  </ul>
+</nav>
+          </div>
+      </details>
+    </aside>
+  
+
+
+    
+
+
+    <div class="content">
+      <p>Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperated situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.</p>
+<p>I also wrote a tool to heat up your laptop, you can find it <a href="https://github.com/hgminh95/heat" target="_blank" rel="noopener">here</a>.</p>
+<h2 id="where-does-the-heat-come-from">Where does the heat come from? <a href="#where-does-the-heat-come-from" class="anchor">🔗</a></h2><p>Before we delve into the solution, let&rsquo;s first pinpoint the primary component responsible for generating heat on your laptop - the Central Processing Unit (CPU). It is one of the components that <a href="https://static.aminer.org/pdf/PDF/000/525/706/power_consumption_breakdown_on_a_modern_laptop.pdf" target="_blank" rel="noopener">consume the most power</a>, and the fact that there are fan or cooling system dedicated to it making this at least a good guess.</p>
+<p>But what mechanism that generate the heat in CPU. After minutes of research in Stack Overflow (<a href="https://electronics.stackexchange.com/questions/160249/why-does-a-processor-get-hot" target="_blank" rel="noopener">link1</a>, <a href="https://stackoverflow.com/questions/12715461/what-cpu-instructions-use-the-most-power" target="_blank" rel="noopener">link2</a>, TODO&hellip; it looks like the more transistor you can activate at a time, the more heat you can generate.</p>
+<p>There are various techniques in hardware design to minimize heat generation such as TODO&hellip;.. As for our purpose, we basically try to undo their effort.</p>
+<p>My initial hypothesis is TODO&hellip;</p>
+<h2 id="setup-the-test-environment">Setup the test environment <a href="#setup-the-test-environment" class="anchor">🔗</a></h2><p><em>Note that below is only for Apple M2 Macbook Air</em></p>
+<p>First is how do we measure amount of heat generated and the power consumed. Both are hard to measured directly (with my limited tooling), I arrive at below solutions that seems to work reliably and well enough:</p>
+<p>For <strong>temparature</strong>, there are various sensors measuring different components in your laptop. You can read some values from <a href="https://en.wikipedia.org/wiki/System_Management_Controller" target="_blank" rel="noopener">SMC</a> via <a href="https://developer.apple.com/documentation/iokit" target="_blank" rel="noopener">IOKit</a>. The sensor name varies between different models. I cannot really find any official source documenting this, but luckly, there are quite many open source library, applications that extract this. In the end, I settle with <a href="https://github.com/narugit/smctemp" target="_blank" rel="noopener">smctemp</a>, which seems to work well with my laptop. The library read the temperature values from all the sensor placed at all CPU cores (both P-cores and E-cores) and average the values.</p>
+<p>Note that there are cooling system that actively trying to drive down the temperature. And if the laptop is overheat, the CPU frequency and workload can be throttled. So this metric is actually more like a lower bound of heat produced.</p>
+<p>I measure the temperatures differences in 5s, 10s, 15s after the code run (after 15s, the temperature tend to stay constant).</p>
+<p>For <strong>power usage</strong>, this <a href="https://superuser.com/a/1700413" target="_blank" rel="noopener">answer</a> in Stack Overflow provides a great way to do it, by plugging your laptop to a power charger, and measuring the amount of power coming into the laptop. The number is not real time, and seems to be refresh on the 30s interval. This is the whole laptop power input, so you might want to disable everything that might consume power: screen, bluetooth, wifi, and kill every possible process you can.</p>
+<p>Now, what kind of code do we benchmark? I can think of serveral things:</p>
+<ul>
+<li>Memory Access (L1, L2, L3)</li>
+<li>Arithmetics (integer, floating point, etc)</li>
+<li>CPU interconnect (multi-thread basically)</li>
+<li>SIMD</li>
+</ul>
+<p>TODO: Explain a bit more here</p>
+<p>Lastly, for the code itself, I end up write a small framework where you can easily add a piece of code you want to benchmark in the github repos. For example, you can add this <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/math.cpp" target="_blank" rel="noopener">code</a> and run the benchmark with below command</p>
+<pre tabindex="0"><code>$ bazel-bin/heat/heat --method math --cores 4 --bm
+...] Emit heat using method math in 1 core(s)
+...] Running in benchmark mode
+...] Getting baseline temperature and power usage. Please check to make sure the numbers are stable.
+...] Will be finished in 2min
+...] Baseline temp: sample=24 avg=38.702347 std=3.649732 min=36.057220 max=53.969673
+                    p10=36.253639 p50=37.664368 p90=41.612141
+...] Baseline watt: sample=24 avg=4.013780 std=2.496656 min=1.516578 max=6.510436
+                    p10=1.516578 p50=6.510436 p90=6.510436
+...] Run #0
+...] Initial Temp: 35.2926
+...]   5s:  +7.83518
+...]   10s: +8.84517
+...]   15s: +10.1611
+...] Temps: sample=30 avg=47.651833 std=1.432894 min=43.127800 max=48.967751
+            p10=45.620243 p50=48.366695 p90=48.770966
+...] Watts: sample=9 avg=5.409431 std=0.019220 min=5.373477 max=5.419704
+            p10=5.373477 p50=5.419704 p90=5.419704
+</code></pre><p>I wouldn&rsquo;t say this is the most accurate benchmark to measure this, but at least we can some useful conclusion from it (hopefully!).</p>
+<h2 id="results">Results <a href="#results" class="anchor">🔗</a></h2><p>I tested below:</p>
+<ul>
+<li>A <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/empty.cpp" target="_blank" rel="noopener">empty</a> while loop that does nothing</li>
+<li>A code that does some simple <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/math.cpp" target="_blank" rel="noopener">arithmetics</a> calculation</li>
+<li>A simple <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/simd.cpp" target="_blank" rel="noopener">SIMD</a> code</li>
+</ul>
+<p>The benchmark is run multiple times to make sure the result are stable as there are many external environmental factor that could affect it. Here are some of the representative result.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Initial Temp</th>
+<th>Temp Diff (5s)</th>
+<th>Temp Diff (10s)</th>
+<th>Temp Diff (15s)</th>
+<th>Power Consumption (Wh - p90)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>empty</td>
+<td>37</td>
+<td>+8</td>
+<td>+11</td>
+<td>+11</td>
+<td>6.7</td>
+</tr>
+<tr>
+<td>arithmetics</td>
+<td>37</td>
+<td>+7</td>
+<td>+8</td>
+<td>+10</td>
+<td>5.4</td>
+</tr>
+<tr>
+<td>SIMD</td>
+<td>40</td>
+<td>+14</td>
+<td>+16</td>
+<td>+18</td>
+<td>8.3</td>
+</tr>
+<tr>
+<td>more&hellip;</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The full logs can be found <a href="TODO">here</a>.</p>
+<p>Some results can be a bit of surprise:</p>
+<ul>
+<li>TODO&hellip;</li>
+</ul>
+<p>Now, what is the best one depends on various factors, e.g. how warm you want it to be, how much battery you have left, etc. But in term of heat/power ratio, SIMD seems to be the winner here (again, the benchmark is not that accurate, so don&rsquo;t put too much trust on this).</p>
+<p>In conclusion, staying warm during a flight when conserving your laptop&rsquo;s battery power is indeed possible. Just remember to keep an eyes on your laptop to avoid overheating issues. Safe travel and happy computing!</p>
+    </div>
+
+    
+    
+    
+<div id="hyvor-talk-view"></div>
+<script type="text/javascript">
+    var HYVOR_TALK_WEBSITE = 6758;
+    var HYVOR_TALK_CONFIG = {
+        url: false,
+        id: false
+    };
+</script>
+<script async type="text/javascript" src="//talk.hyvor.com/web-api/embed.js"></script>
+
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+
+    
+</footer>
+
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "e30af24cf01841aa9b69c777b7cf7096"}'></script>
+
+
+
+
+
+
+  </body>
+</html>

@@ -15,6 +15,8 @@ date: 2020-03-11T20:34:35+08:00
 - [CPPCon](https://cppcon.org/) - C++, and performance stuff
 - [Hacker News](https://news.ycombinator.com/) - Mostly not about technical stuff, but sometimes interesting things pop up over there
 - [Erik Rigtorp's blog](https://rigtorp.se/) - Low latency (no longer updated)
+- [Brendan Gregg's website](https://www.brendangregg.com/) - Performance monitor and analysis
+- [JabPerf's blog](www.jabperf.com) - Low Latency
 
 ## Data Structure and Algo
 

@@ -104,3 +104,5 @@ Some notes:
 - What is the best one depends on various factors, e.g. how warm you want it to be, how much battery you have left, etc. But in term of heat/power ratio, SIMD seems to be the winner here.
 
 In conclusion, staying warm during a flight when conserving your laptop's battery power is indeed possible. Just remember to keep an eyes on your laptop to avoid overheating issues. Safe travel and happy computing!
+
+_There are probably a lot of holes in the benchmark or the analysis, if you spot something fishy, feel free to comment down below :)_

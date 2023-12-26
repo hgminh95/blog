@@ -93,7 +93,7 @@ I also wrote a tool to heat up your laptop, you can find it here.">
           ·
         </span>
         <span>
-          891 words
+          978 words
         </span>
         <span class="split">
           ·
@@ -141,14 +141,14 @@ I also wrote a tool to heat up your laptop, you can find it here.">
 <p>Note that there are cooling system that actively trying to drive down the temperature. And if the laptop is overheat, the CPU frequency and workload can be throttled. So this metric is actually more like a lower bound of heat produced.</p>
 <p>I measure the temperatures differences in 5s, 10s, 15s after the code run (after 15s, the temperature tend to stay constant).</p>
 <p>For <strong>power usage</strong>, this <a href="https://superuser.com/a/1700413" target="_blank" rel="noopener">answer</a> in Stack Overflow provides a great way to do it, by plugging your laptop to a power charger, and measuring the amount of power coming into the laptop. The number is not real time, and seems to be refresh on the 30s interval. This is the whole laptop power input, so you might want to disable everything that might consume power: screen, bluetooth, wifi, and kill every possible process you can.</p>
+<p>For completeness, I also measure IPC (instruction per cycle) to see how many instructions are performing together (higher IPC ~ higher hardware utilization ~ more heat). The code is borrowed from <a href="https://lemire.me/blog/2023/03/21/counting-cycles-and-instructions-on-arm-based-apple-systems/" target="_blank" rel="noopener">Daniel Lemire&rsquo;s blog</a></p>
 <p>Now, what kind of code do we benchmark? I can think of serveral things:</p>
 <ul>
-<li>Memory Access (L1, L2, L3)</li>
+<li>Memory Access</li>
 <li>Arithmetics (integer, floating point, etc)</li>
 <li>CPU interconnect (multi-thread basically)</li>
 <li>SIMD</li>
 </ul>
-<p>TODO: Explain a bit more here</p>
 <p>Lastly, for the code itself, I end up write a small framework where you can easily add a piece of code you want to benchmark in the github repos. For example, you can add this <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/math.cpp" target="_blank" rel="noopener">code</a> and run the benchmark with below command</p>
 <pre tabindex="0"><code>$ bazel-bin/heat/heat --method math --cores 4 --bm
 ...] Emit heat using method math in 1 core(s)
@@ -169,9 +169,8 @@ I also wrote a tool to heat up your laptop, you can find it here.">
 ...] Watts: sample=9 avg=5.409431 std=0.019220 min=5.373477 max=5.419704
             p10=5.373477 p50=5.419704 p90=5.419704
 </code></pre><p>I wouldn&rsquo;t say this is the most accurate benchmark to measure this, but at least we can some useful conclusion from it (hopefully!).</p>
-<h2 id="results">Results <a href="#results" class="anchor">🔗</a></h2><p>I tested below:</p>
+<h2 id="results">Results <a href="#results" class="anchor">🔗</a></h2><p>I tested below approaches:</p>
 <ul>
-<li>A <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/empty.cpp" target="_blank" rel="noopener">empty</a> while loop that does nothing</li>
 <li>A code that does some simple <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/math.cpp" target="_blank" rel="noopener">arithmetics</a> calculation</li>
 <li>A simple <a href="https://github.com/hgminh95/heat/blob/main/heat/methods/simd.cpp" target="_blank" rel="noopener">SIMD</a> code</li>
 </ul>
@@ -180,54 +179,80 @@ I also wrote a tool to heat up your laptop, you can find it here.">
 <thead>
 <tr>
 <th>Code</th>
-<th>Initial Temp</th>
+<th># cores</th>
 <th>Temp Diff (5s)</th>
 <th>Temp Diff (10s)</th>
-<th>Temp Diff (15s)</th>
 <th>Power Consumption (Wh - p90)</th>
+<th>IPC</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>empty</td>
-<td>37</td>
-<td>+8</td>
-<td>+11</td>
-<td>+11</td>
-<td>6.7</td>
+<td>arithmetic_integer</td>
+<td>1</td>
+<td>+13</td>
+<td>+15</td>
+<td>10.7</td>
+<td>4.7</td>
 </tr>
 <tr>
-<td>arithmetics</td>
-<td>37</td>
-<td>+7</td>
-<td>+8</td>
-<td>+10</td>
-<td>5.4</td>
+<td>arithmetic_integer</td>
+<td>2</td>
+<td>+25</td>
+<td>+29</td>
+<td>16.3</td>
+<td>-</td>
+</tr>
+<tr>
+<td>arithmetic_integer</td>
+<td>3</td>
+<td>+32</td>
+<td>+37</td>
+<td>19.1</td>
+<td>-</td>
+</tr>
+<tr>
+<td>arithmetic_float</td>
+<td>1</td>
+<td>+11</td>
+<td>+13</td>
+<td>10.1</td>
+<td>3.4</td>
 </tr>
 <tr>
 <td>SIMD</td>
-<td>40</td>
-<td>+14</td>
-<td>+16</td>
-<td>+18</td>
-<td>8.3</td>
+<td>1</td>
+<td>+12</td>
+<td>+13</td>
+<td>6</td>
+<td>2.9</td>
 </tr>
 <tr>
-<td>more&hellip;</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>SIMD</td>
+<td>4</td>
+<td>+20</td>
+<td>+22</td>
+<td>11.6</td>
+<td>-</td>
+</tr>
+<tr>
+<td>SIMD</td>
+<td>5</td>
+<td>+9</td>
+<td>+10</td>
+<td>8.8</td>
+<td>-</td>
 </tr>
 </tbody>
 </table>
 <p>The full logs can be found <a href="TODO">here</a>.</p>
-<p>Some results can be a bit of surprise:</p>
+<p>Some notes:</p>
 <ul>
-<li>TODO&hellip;</li>
+<li>The initial temperature does not have a lot of affect on temperature changes as long as they are &lt; 40 degree celcius.</li>
+<li>I can achieve highest IPC with integer operation, and unsurprisingly, we generate the most heat with it.</li>
+<li>What is the best one depends on various factors, e.g. how warm you want it to be, how much battery you have left, etc. But in term of heat/power ratio, SIMD seems to be the winner here.</li>
+<li>I actually did some tests on memory access, inter core communication but initial results on those cases do not seem very potential so they are not pursuited further and included here.</li>
 </ul>
-<p>Now, what is the best one depends on various factors, e.g. how warm you want it to be, how much battery you have left, etc. But in term of heat/power ratio, SIMD seems to be the winner here (again, the benchmark is not that accurate, so don&rsquo;t put too much trust on this).</p>
 <p>In conclusion, staying warm during a flight when conserving your laptop&rsquo;s battery power is indeed possible. Just remember to keep an eyes on your laptop to avoid overheating issues. Safe travel and happy computing!</p>
     </div>
 

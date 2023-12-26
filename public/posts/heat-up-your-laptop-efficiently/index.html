@@ -6,9 +6,15 @@
     <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
 <meta name="viewport" content="width=device-width,minimum-scale=1">
-<meta name="description" content="Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to a charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperate situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.
+<meta name="description" content="NOTE: As many in Reddit point out, majority of energy will be converted to heat anyway, so the idea that some instructions can emit more heat while using less power does not make sense.
+The number should still be correct to my knowledge, but the temperature differences should be just be due to different area in the chip heating up.
+
+Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to a charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperate situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.
 The final tool can be found here.">
-<meta name="og:description" content="Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to a charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperate situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.
+<meta name="og:description" content="NOTE: As many in Reddit point out, majority of energy will be converted to heat anyway, so the idea that some instructions can emit more heat while using less power does not make sense.
+The number should still be correct to my knowledge, but the temperature differences should be just be due to different area in the chip heating up.
+
+Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to a charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperate situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.
 The final tool can be found here.">
 
 <meta name="og:image" content="/images/laptop-burning.png">
@@ -93,7 +99,7 @@ The final tool can be found here.">
           ·
         </span>
         <span>
-          1106 words
+          1191 words
         </span>
         <span class="split">
           ·
@@ -129,7 +135,10 @@ The final tool can be found here.">
 
 
     <div class="content">
-      <p>Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to a charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperate situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.</p>
+      <p><strong>NOTE: As <a href="https://www.reddit.com/r/cpp/comments/18r8upf/heat_up_your_laptop_efficiently/" target="_blank" rel="noopener">many in Reddit point out</a>, majority of energy will be converted to heat anyway, so the idea that some instructions can emit more heat while using less power does not make sense.</strong></p>
+<p>The number should still be correct to my knowledge, but the temperature differences should be just be due to different area in the chip heating up.</p>
+<hr>
+<p>Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to a charging outlet, and your laptop&rsquo;s battery life is limited, you are indeed in a desperate situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.</p>
 <p>The final tool can be found <a href="https://github.com/hgminh95/heat" target="_blank" rel="noopener">here</a>.</p>
 <h2 id="where-does-the-heat-come-from">Where does the heat come from? <a href="#where-does-the-heat-come-from" class="anchor">🔗</a></h2><p>Before we delve into the solution, let&rsquo;s first pinpoint the primary component responsible for generating heat on your laptop - the Central Processing Unit (CPU). It is one of the components that <a href="https://static.aminer.org/pdf/PDF/000/525/706/power_consumption_breakdown_on_a_modern_laptop.pdf" target="_blank" rel="noopener">consume the most power</a>, and the fact that there are fans or cooling system dedicated to it makes this at least a good guess.</p>
 <p>But by what mechanism that heat is generated in the CPU. After minutes of research in <a href="https://lemire.me/blog/2023/03/21/counting-cycles-and-instructions-on-arm-based-apple-systems/" target="_blank" rel="noopener">Stack</a> <a href="https://stackoverflow.com/questions/12715461/what-cpu-instructions-use-the-most-power" target="_blank" rel="noopener">Overflow</a>, it looks like heat is generated when a transistor changes state; which roughly means the more hardware is activated at a time, the more heat we can produce.</p>
@@ -288,6 +297,7 @@ The final tool can be found here.">
 <li>What is the best one depends on various factors, e.g. how warm you want it to be, how much battery you have left, etc. But in term of heat/power ratio, SIMD seems to be the winner here.</li>
 </ul>
 <p>In conclusion, staying warm during a flight when conserving your laptop&rsquo;s battery power is indeed possible. Just remember to keep an eyes on your laptop to avoid overheating issues. Safe travel and happy computing!</p>
+<p><em>There are probably a lot of holes in the benchmark or the analysis, if you spot something fishy, feel free to comment down below :)</em></p>
     </div>
 
     

@@ -5,6 +5,12 @@ thumbnail: laptop-burning.png
 draft: false
 ---
 
+**NOTE: As [many in Reddit point out](https://www.reddit.com/r/cpp/comments/18r8upf/heat_up_your_laptop_efficiently/), majority of energy will be converted to heat anyway, so the idea that some instructions can emit more heat while using less power does not make sense.**
+
+The number should still be correct to my knowledge, but the temperature differences should be just be due to different area in the chip heating up.
+
+---
+
 Have you ever been in a long-haul flight, nestled in your seat with your laptop, only to find that the chilly cabin air is making it impossible to sleep? With no access to a charging outlet, and your laptop's battery life is limited, you are indeed in a desperate situation. In this article, we will explore an efficient way to heat up your laptop while minimizing power usage, ensuring that you stay cozy throughout the flight.
 
 The final tool can be found [here](https://github.com/hgminh95/heat).
